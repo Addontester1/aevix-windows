@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="Aevix_App.Pages.HomePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    mc:Ignorable="d">
+    <ScrollViewer>
+        <StackPanel Padding="32" Spacing="16">
+            <TextBlock Text="Welcome to Aevix" Style="{StaticResource TitleLargeTextBlockStyle}" />
+            <TextBlock x:Name="StatusText" Style="{StaticResource BodyTextBlockStyle}" Opacity="0.8" />
+
+            <TextBlock Text="Continue watching" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,16,0,0" />
+            <ListView x:Name="ContinueList" SelectionMode="None" />
+
+            <TextBlock Text="Quick actions" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,16,0,0" />
+            <StackPanel Orientation="Horizontal" Spacing="12">
+                <Button Content="Manage playlists" Click="GoPlaylists_Click" />
+                <Button Content="Open Live TV" Click="GoLiveTv_Click" />
+                <Button Content="Open Movies" Click="GoMovies_Click" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

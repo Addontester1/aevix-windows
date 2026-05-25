@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="Aevix_App.Pages.PlaylistsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:m="using:Aevix.Core.Models"
+    mc:Ignorable="d">
+    <Grid Padding="16" RowSpacing="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Content="Add playlist" Click="Add_Click" />
+            <Button Content="Sync selected" Click="Sync_Click" />
+            <Button Content="Set active" Click="Activate_Click" />
+            <Button Content="Delete" Click="Delete_Click" />
+        </StackPanel>
+        <TextBlock x:Name="SyncStatus" Grid.Row="1" Opacity="0.7" />
+        <ListView x:Name="PlaylistList" Grid.Row="2">
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="m:Playlist">
+                    <Grid Padding="8,6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" />
+                            <TextBlock Text="{x:Bind Url}" Opacity="0.7" FontSize="12" />
+                        </StackPanel>
+                        <TextBlock Grid.Column="1" VerticalAlignment="Center" Opacity="0.7">
+                            <Run Text="{x:Bind ChannelCount}" /><Run Text=" ch / " /><Run Text="{x:Bind VodCount}" /><Run Text=" vod / " /><Run Text="{x:Bind SeriesCount}" /><Run Text=" series" />
+                        </TextBlock>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </Grid>
+</Page>

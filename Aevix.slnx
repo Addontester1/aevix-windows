@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Aevix.App/Aevix.App.csproj" />
+    <Project Path="src/Aevix.Core/Aevix.Core.csproj" />
+    <Project Path="src/Aevix.Data/Aevix.Data.csproj" />
+    <Project Path="src/Aevix.Player/Aevix.Player.csproj" />
+  </Folder>
+</Solution>

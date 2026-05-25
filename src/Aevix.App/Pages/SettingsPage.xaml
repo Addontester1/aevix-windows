@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="Aevix_App.Pages.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    mc:Ignorable="d">
+    <ScrollViewer>
+        <StackPanel Padding="24" Spacing="12" MaxWidth="640" HorizontalAlignment="Left">
+            <TextBlock Text="Settings" Style="{StaticResource TitleTextBlockStyle}" />
+            <ToggleSwitch x:Name="AutoPlayToggle"  Header="Auto-play next item" />
+            <ToggleSwitch x:Name="ContinueToggle"  Header="Continue watching enabled" />
+            <ToggleSwitch x:Name="EpgRefreshToggle" Header="Auto-refresh EPG" />
+            <ToggleSwitch x:Name="AdultBlockToggle" Header="Block adult content" />
+            <NumberBox     x:Name="EpgOffsetBox"    Header="EPG offset (minutes)" SpinButtonPlacementMode="Inline" Minimum="-720" Maximum="720" />
+            <Button Content="Save" Click="Save_Click" Style="{StaticResource AccentButtonStyle}" />
+            <Button Content="Open parental settings" Click="Parental_Click" />
+        </StackPanel>
+    </ScrollViewer>
+</Page>

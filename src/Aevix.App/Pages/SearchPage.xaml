@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="Aevix_App.Pages.SearchPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:m="using:Aevix.Core.Models"
+    mc:Ignorable="d">
+    <Grid Padding="16" RowSpacing="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <AutoSuggestBox x:Name="QueryBox" PlaceholderText="Search channels, movies, series…" QueryIcon="Find" TextChanged="QueryBox_TextChanged" />
+        <TextBlock x:Name="StatusText" Grid.Row="1" Style="{StaticResource BodyTextBlockStyle}" Opacity="0.7" />
+
+        <Grid Grid.Row="2" RowSpacing="16">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <StackPanel Spacing="6">
+                <TextBlock Text="Channels" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <ListView x:Name="ChannelList" SelectionMode="None" MaxHeight="200">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="m:Channel">
+                            <TextBlock Text="{x:Bind Name}" />
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </StackPanel>
+
+            <StackPanel Grid.Row="1" Spacing="6">
+                <TextBlock Text="Movies" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <ListView x:Name="MovieList" SelectionMode="None" MaxHeight="200">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="m:VodItem">
+                            <TextBlock Text="{x:Bind Title}" />
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </StackPanel>
+
+            <StackPanel Grid.Row="2" Spacing="6">
+                <TextBlock Text="Series" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <ListView x:Name="SeriesList" SelectionMode="None" MaxHeight="200">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="m:Series">
+                            <TextBlock Text="{x:Bind Title}" />
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Page>

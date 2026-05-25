@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="Aevix_App.Pages.LiveTvPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:m="using:Aevix.Core.Models"
+    mc:Ignorable="d">
+    <Grid Padding="16">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="280" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <TextBlock Text="Categories" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,8" />
+            <ListView x:Name="CategoryList" Grid.Row="1" SelectionChanged="CategoryList_SelectionChanged">
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="m:CategoryCount">
+                        <Grid Padding="8,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="{x:Bind Group}" />
+                            <TextBlock Grid.Column="1" Text="{x:Bind Count}" Opacity="0.6" />
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
+
+        <Grid Grid.Column="1" Margin="16,0,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <TextBlock x:Name="StatusText" Style="{StaticResource SubtitleTextBlockStyle}" />
+            <ListView x:Name="ChannelList" Grid.Row="1" DoubleTapped="ChannelList_DoubleTapped">
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="m:Channel">
+                        <Grid Padding="8,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="36" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Image Width="32" Height="32" Source="{x:Bind LogoUrl}" />
+                            <TextBlock Grid.Column="1" Margin="12,0,0,0" Text="{x:Bind Name}" VerticalAlignment="Center" />
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
+    </Grid>
+</Page>

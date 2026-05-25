@@ -1,0 +1,45 @@
+using Aevix.Core.Models;
+using Aevix_App.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
+
+namespace Aevix_App.Pages;
+
+public sealed partial class LiveTvPage : Page
+{
+    public LiveTvViewModel Vm { get; }
+
+    public LiveTvPage()
+    {
+        Vm = App.Services.GetRequiredService<LiveTvViewModel>();
+        InitializeComponent();
+        CategoryList.ItemsSource = Vm.Categories;
+        ChannelList.ItemsSource = Vm.Channels;
+        StatusText.Text = Vm.StatusText;
+        Vm.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(Vm.StatusText)) StatusText.Text = Vm.StatusText;
+        };
+        Loaded += async (_, _) => await Vm.LoadAsync();
+    }
+
+    private void CategoryList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        Vm.SelectedCategory = CategoryList.SelectedItem as CategoryCount;
+    }
+
+    private void ChannelList_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+    {
+        if (ChannelList.SelectedItem is Channel ch)
+        {
+            Frame.Navigate(typeof(PlayerPage), new PlayRequest(ch.Name, ch.StreamUri));
+        }
+    }
+}
+
+/// <summary>
+/// Navigation payload — page-to-page contract. Kept here next to its
+/// originator so the dependency graph is obvious.
+/// </summary>
+public sealed record PlayRequest(string Title, string Url);

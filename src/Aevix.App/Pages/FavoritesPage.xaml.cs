@@ -1,0 +1,23 @@
+using Aevix_App.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Xaml.Controls;
+
+namespace Aevix_App.Pages;
+
+public sealed partial class FavoritesPage : Page
+{
+    public FavoritesViewModel Vm { get; }
+
+    public FavoritesPage()
+    {
+        Vm = App.Services.GetRequiredService<FavoritesViewModel>();
+        InitializeComponent();
+        FavList.ItemsSource = Vm.RawFavorites;
+        StatusText.Text = Vm.StatusText;
+        Vm.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(Vm.StatusText)) StatusText.Text = Vm.StatusText;
+        };
+        Loaded += async (_, _) => await Vm.LoadAsync();
+    }
+}

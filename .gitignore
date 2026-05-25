@@ -1,0 +1,48 @@
+# ---- .NET / MSBuild ----------------------------------------------------
+bin/
+obj/
+*.user
+*.suo
+*.userprefs
+*.cache
+*.dll.config
+.vs/
+.vscode/
+TestResults/
+*.coverage
+*.coveragexml
+
+# ---- WinUI / Windows App SDK ------------------------------------------
+AppPackages/
+BundleArtifacts/
+*.appx
+*.appxbundle
+*.appxupload
+*.msix
+*.msixbundle
+*.msixupload
+Generated Files/
+*.pri
+
+# ---- Publish / output --------------------------------------------------
+publish/
+*.pdb
+*.exe.config
+
+# ---- Tooling -----------------------------------------------------------
+*.swp
+*.tmp
+*.bak
+*.log
+.idea/
+*.iml
+*.DS_Store
+Thumbs.db
+
+# ---- Rider / VS user state --------------------------------------------
+*.csproj.user
+*.sln.docstates
+launchSettings.json
+
+# ---- Local sandbox -----------------------------------------------------
+local.runsettings

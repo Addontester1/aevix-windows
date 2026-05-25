@@ -7,22 +7,57 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     mc:Ignorable="d">
     <ScrollViewer>
-        <StackPanel Padding="24" Spacing="12" MaxWidth="560" HorizontalAlignment="Left">
-            <TextBlock Text="Add playlist" Style="{StaticResource TitleTextBlockStyle}" />
-            <ComboBox x:Name="TypeBox" Header="Type" SelectedIndex="0">
-                <ComboBoxItem Content="M3U URL" Tag="M3UUrl" />
-                <ComboBoxItem Content="M3U file" Tag="M3UFile" />
-                <ComboBoxItem Content="Xtream Codes" Tag="Xtream" />
+        <StackPanel Padding="24" Spacing="14" MaxWidth="640" HorizontalAlignment="Left">
+            <StackPanel Spacing="2">
+                <TextBlock x:Name="FormTitleText" Text="Add playlist" Style="{StaticResource TitleLargeTextBlockStyle}" />
+                <TextBlock Text="Choose the playlist type — only the fields it needs will show."
+                           Foreground="{ThemeResource AevixMutedTextBrush}" />
+            </StackPanel>
+
+            <ComboBox x:Name="TypeBox" Header="Type" SelectionChanged="TypeBox_SelectionChanged" MinWidth="240">
+                <ComboBoxItem Content="M3U URL"        Tag="M3UUrl" IsSelected="True" />
+                <ComboBoxItem Content="M3U file"       Tag="M3UFile" />
+                <ComboBoxItem Content="Xtream Codes"   Tag="Xtream" />
                 <ComboBoxItem Content="Stalker portal" Tag="Stalker" />
             </ComboBox>
-            <TextBox x:Name="NameBox" Header="Name" />
-            <TextBox x:Name="UrlBox" Header="URL or file path" />
-            <TextBox x:Name="UserBox" Header="Username (Xtream)" />
-            <PasswordBox x:Name="PassBox" Header="Password (Xtream)" />
-            <TextBox x:Name="MacBox" Header="MAC address (Stalker, e.g. 00:1A:79:AA:BB:CC)" />
 
-            <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,12,0,0">
-                <Button Content="Save" Click="Save_Click" Style="{StaticResource AccentButtonStyle}" />
+            <TextBox x:Name="NameBox" Header="Name" PlaceholderText="Friendly label — e.g. 'My main playlist'" />
+
+            <!-- M3U URL -->
+            <StackPanel x:Name="M3uUrlGroup" Spacing="8" Visibility="Visible">
+                <TextBox x:Name="M3uUrlBox" Header="M3U URL" PlaceholderText="https://example.com/playlist.m3u" />
+            </StackPanel>
+
+            <!-- M3U file -->
+            <StackPanel x:Name="M3uFileGroup" Spacing="8" Visibility="Collapsed">
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="M3uFileBox" Header="M3U file path" PlaceholderText="C:\path\to\playlist.m3u" />
+                    <Button Grid.Column="1" Content="Browse…" VerticalAlignment="Bottom" Click="BrowseFile_Click" />
+                </Grid>
+            </StackPanel>
+
+            <!-- Xtream -->
+            <StackPanel x:Name="XtreamGroup" Spacing="8" Visibility="Collapsed">
+                <TextBox      x:Name="XtreamUrlBox"  Header="Server URL"
+                              PlaceholderText="http://example.com:8080 (no /player_api.php needed)" />
+                <TextBox      x:Name="XtreamUserBox" Header="Username" />
+                <PasswordBox  x:Name="XtreamPassBox" Header="Password" />
+            </StackPanel>
+
+            <!-- Stalker -->
+            <StackPanel x:Name="StalkerGroup" Spacing="8" Visibility="Collapsed">
+                <TextBox x:Name="StalkerUrlBox" Header="Portal URL"
+                         PlaceholderText="http://portal.example.com/c (or /portal.php)" />
+                <TextBox x:Name="StalkerMacBox" Header="MAC address"
+                         PlaceholderText="00:1A:79:AA:BB:CC" />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,16,0,0">
+                <Button x:Name="SaveButton" Content="Save" Click="Save_Click" Style="{StaticResource AccentButtonStyle}" />
                 <Button Content="Cancel" Click="Cancel_Click" />
             </StackPanel>
             <TextBlock x:Name="StatusText" Opacity="0.7" />

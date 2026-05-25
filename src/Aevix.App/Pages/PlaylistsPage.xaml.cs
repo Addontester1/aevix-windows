@@ -38,6 +38,18 @@ public sealed partial class PlaylistsPage : Page
 
     private void Add_Click(object sender, RoutedEventArgs e) => Frame.Navigate(typeof(PlaylistFormPage));
 
+    /// <summary>
+    /// Navigate to the form page in edit mode. Passes the playlist id as the
+    /// nav parameter — <see cref="PlaylistFormPage.OnNavigatedTo"/> loads it.
+    /// </summary>
+    private void Edit_Click(object sender, RoutedEventArgs e)
+    {
+        if (PlaylistList.SelectedItem is PlaylistView v)
+        {
+            Frame.Navigate(typeof(PlaylistFormPage), v.Id);
+        }
+    }
+
     private async void Sync_Click(object sender, RoutedEventArgs e)
     {
         if (PlaylistList.SelectedItem is PlaylistView v) await Vm.SyncCommand.ExecuteAsync(v);

@@ -97,6 +97,7 @@
                 CornerRadius="{StaticResource AevixCardCornerRadius}" Padding="12,8">
             <StackPanel Orientation="Horizontal" Spacing="8">
                 <Button Content="Sync"        Click="Sync_Click" />
+                <Button Content="Edit"        Click="Edit_Click" />
                 <Button Content="Set active"  Click="Activate_Click" />
                 <Button Content="Delete"      Click="Delete_Click" />
             </StackPanel>

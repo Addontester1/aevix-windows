@@ -10,8 +10,13 @@ public sealed partial class LiveTvPage : Page
 {
     public LiveTvViewModel Vm { get; }
 
+    private bool _initialLoadDone;
+
     public LiveTvPage()
     {
+        // Cache the page instance across navigations so category selection
+        // + scroll position survive a round-trip through Player.
+        NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Required;
         Vm = App.Services.GetRequiredService<LiveTvViewModel>();
         InitializeComponent();
         CategoryList.ItemsSource = Vm.Categories;
@@ -22,7 +27,18 @@ public sealed partial class LiveTvPage : Page
             if (e.PropertyName == nameof(Vm.StatusText)) StatusText.Text = Vm.StatusText;
         };
         Vm.Channels.CollectionChanged += (_, _) => UpdateEmptyState();
-        Loaded += async (_, _) => { await Vm.LoadAsync(); UpdateEmptyState(); };
+        Loaded += async (_, _) =>
+        {
+            // Page is cached — only do the initial expensive load once. On
+            // subsequent visits the categories + selected channel list are
+            // already populated.
+            if (!_initialLoadDone)
+            {
+                await Vm.LoadAsync();
+                _initialLoadDone = true;
+            }
+            UpdateEmptyState();
+        };
     }
 
     private void UpdateEmptyState()

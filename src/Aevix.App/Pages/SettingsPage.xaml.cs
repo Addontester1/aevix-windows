@@ -1,4 +1,5 @@
 using Aevix.Core.Models;
+using Aevix_App.Services;
 using Aevix_App.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
@@ -9,23 +10,44 @@ namespace Aevix_App.Pages;
 public sealed partial class SettingsPage : Page
 {
     public SettingsViewModel Vm { get; }
+    private readonly ParentalGate _gate;
 
     /// <summary>True while we're programmatically hydrating controls so the change handlers don't fight back.</summary>
     private bool _hydrating;
 
     public SettingsPage()
     {
+        NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Required;
         Vm = App.Services.GetRequiredService<SettingsViewModel>();
+        _gate = App.Services.GetRequiredService<ParentalGate>();
         InitializeComponent();
         Vm.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(Vm.ParentalStatus)) ParentalStatusText.Text = Vm.ParentalStatus;
             if (e.PropertyName == nameof(Vm.SaveStatus)) SaveStatusText.Text = Vm.SaveStatus;
             if (e.PropertyName == nameof(Vm.AdultContentBlocked)) AdultBlockToggle.IsOn = Vm.AdultContentBlocked;
-            if (e.PropertyName == nameof(Vm.IsPinSet)) ClearPinButton.IsEnabled = Vm.IsPinSet;
+            if (e.PropertyName == nameof(Vm.IsPinSet)) UpdateButtonState();
         };
+        _gate.SessionStateChanged += (_, _) => UpdateSessionStatus();
 
-        Loaded += async (_, _) => await HydrateAsync();
+        Loaded += async (_, _) => { await HydrateAsync(); UpdateSessionStatus(); UpdateButtonState(); };
+    }
+
+    private void UpdateButtonState()
+    {
+        ClearPinButton.IsEnabled = Vm.IsPinSet;
+        UnlockSessionBtn.IsEnabled = Vm.IsPinSet && Vm.AdultContentBlocked && !_gate.IsSessionUnlocked;
+        LockSessionBtn.IsEnabled = _gate.IsSessionUnlocked;
+    }
+
+    private void UpdateSessionStatus()
+    {
+        SessionStatusText.Text = _gate.IsSessionUnlocked
+            ? "Session unlocked — adult content is visible until you close Aevix or click ‘Lock now’."
+            : (Vm.IsPinSet && Vm.AdultContentBlocked
+                ? "Session locked — adult content is hidden."
+                : string.Empty);
+        UpdateButtonState();
     }
 
     private async Task HydrateAsync()
@@ -137,6 +159,7 @@ public sealed partial class SettingsPage : Page
         {
             PinBox.Password = string.Empty;
         }
+        UpdateSessionStatus();
     }
 
     private async void ClearPin_Click(object sender, RoutedEventArgs e)
@@ -146,5 +169,39 @@ public sealed partial class SettingsPage : Page
         {
             PinBox.Password = string.Empty;
         }
+        UpdateSessionStatus();
+    }
+
+    /// <summary>
+    /// TV-style: verify the PIN and unlock adult content for the current
+    /// session only. Persistent block setting stays ON, so a process
+    /// restart returns to the locked state.
+    /// </summary>
+    private async void UnlockSession_Click(object sender, RoutedEventArgs e)
+    {
+        var pin = PinBox.Password;
+        if (string.IsNullOrWhiteSpace(pin))
+        {
+            Vm.ParentalStatus = "Enter your PIN in the box, then click Unlock.";
+            return;
+        }
+        var ok = await _gate.TryUnlockSessionAsync(pin);
+        if (ok)
+        {
+            PinBox.Password = string.Empty;
+            Vm.ParentalStatus = "Session unlocked.";
+        }
+        else
+        {
+            Vm.ParentalStatus = "Wrong PIN.";
+        }
+        UpdateSessionStatus();
+    }
+
+    private void LockSession_Click(object sender, RoutedEventArgs e)
+    {
+        _gate.LockSession();
+        Vm.ParentalStatus = "Session locked — adult content hidden again.";
+        UpdateSessionStatus();
     }
 }

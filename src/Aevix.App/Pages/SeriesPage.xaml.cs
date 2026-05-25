@@ -9,8 +9,11 @@ public sealed partial class SeriesPage : Page
 {
     public SeriesViewModel Vm { get; }
 
+    private bool _initialLoadDone;
+
     public SeriesPage()
     {
+        NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Required;
         Vm = App.Services.GetRequiredService<SeriesViewModel>();
         InitializeComponent();
         SeriesGrid.ItemsSource = Vm.AllSeries;
@@ -20,7 +23,11 @@ public sealed partial class SeriesPage : Page
             if (e.PropertyName == nameof(Vm.StatusText)) StatusText.Text = Vm.StatusText;
         };
         Vm.AllSeries.CollectionChanged += (_, _) => UpdateEmptyState();
-        Loaded += async (_, _) => { await Vm.LoadAsync(); UpdateEmptyState(); };
+        Loaded += async (_, _) =>
+        {
+            if (!_initialLoadDone) { await Vm.LoadAsync(); _initialLoadDone = true; }
+            UpdateEmptyState();
+        };
     }
 
     private void UpdateEmptyState()

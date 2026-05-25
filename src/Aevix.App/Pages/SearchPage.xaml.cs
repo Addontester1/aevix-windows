@@ -10,6 +10,7 @@ public sealed partial class SearchPage : Page
 
     public SearchPage()
     {
+        NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Required;
         Vm = App.Services.GetRequiredService<SearchViewModel>();
         InitializeComponent();
         ChannelList.ItemsSource = Vm.Channels;

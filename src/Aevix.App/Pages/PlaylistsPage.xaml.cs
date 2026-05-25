@@ -12,6 +12,7 @@ public sealed partial class PlaylistsPage : Page
 
     public PlaylistsPage()
     {
+        NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Required;
         Vm = App.Services.GetRequiredService<PlaylistsViewModel>();
         InitializeComponent();
         PlaylistList.ItemsSource = Vm.Playlists;

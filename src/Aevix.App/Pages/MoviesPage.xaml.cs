@@ -10,8 +10,11 @@ public sealed partial class MoviesPage : Page
 {
     public MoviesViewModel Vm { get; }
 
+    private bool _initialLoadDone;
+
     public MoviesPage()
     {
+        NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Required;
         Vm = App.Services.GetRequiredService<MoviesViewModel>();
         InitializeComponent();
         CategoryList.ItemsSource = Vm.Categories;
@@ -22,7 +25,11 @@ public sealed partial class MoviesPage : Page
             if (e.PropertyName == nameof(Vm.StatusText)) StatusText.Text = Vm.StatusText;
         };
         Vm.Movies.CollectionChanged += (_, _) => UpdateEmptyState();
-        Loaded += async (_, _) => { await Vm.LoadAsync(); UpdateEmptyState(); };
+        Loaded += async (_, _) =>
+        {
+            if (!_initialLoadDone) { await Vm.LoadAsync(); _initialLoadDone = true; }
+            UpdateEmptyState();
+        };
     }
 
     private void UpdateEmptyState()

@@ -10,6 +10,7 @@ public sealed partial class FavoritesPage : Page
 
     public FavoritesPage()
     {
+        NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Required;
         Vm = App.Services.GetRequiredService<FavoritesViewModel>();
         InitializeComponent();
         FavList.ItemsSource = Vm.RawFavorites;

@@ -55,6 +55,7 @@ public static class AppHost
         services.AddSingleton<SyncService>();
         services.AddSingleton<AevixPlayer>();
         services.AddSingleton<IContentSink, EfContentSink>();
+        services.AddSingleton<ParentalGate>();
 
         // -- Data ---------------------------------------------------------
         services.AddAevixData(dbPath);

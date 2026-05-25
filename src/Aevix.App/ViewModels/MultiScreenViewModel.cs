@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using Aevix.Core.Models;
 using Aevix.Data.Dao;
 using Aevix.Player;
+using Aevix_App.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using LibVLCSharp.Shared;
 
@@ -47,6 +48,7 @@ public sealed partial class MultiScreenViewModel : ObservableObject, IDisposable
     private readonly ContentRepository _content;
     private readonly SettingsRepository _settings;
     private readonly AevixPlayer _player;
+    private readonly ParentalGate _gate;
 
     public ObservableCollection<MultiScreenCell> Cells { get; } = new();
     public ObservableCollection<CategoryCount> PickerCategories { get; } = new();
@@ -63,12 +65,14 @@ public sealed partial class MultiScreenViewModel : ObservableObject, IDisposable
         PlaylistRepository playlists,
         ContentRepository content,
         SettingsRepository settings,
-        AevixPlayer player)
+        AevixPlayer player,
+        ParentalGate gate)
     {
         _playlists = playlists;
         _content = content;
         _settings = settings;
         _player = player;
+        _gate = gate;
     }
 
     public bool HasLayout => Layout > 0;
@@ -156,7 +160,8 @@ public sealed partial class MultiScreenViewModel : ObservableObject, IDisposable
             return;
         }
         var settings = await _settings.GetAsync(ct);
-        foreach (var c in await _content.GetChannelCategoriesAsync(active.Id, settings.AdultContentBlocked, ct))
+        var hide = _gate.ShouldHideAdultContent(settings.AdultContentBlocked);
+        foreach (var c in await _content.GetChannelCategoriesAsync(active.Id, hide, ct))
         {
             PickerCategories.Add(c);
         }
@@ -171,7 +176,8 @@ public sealed partial class MultiScreenViewModel : ObservableObject, IDisposable
         var active = await _playlists.GetActiveAsync();
         if (active is null) return;
         var settings = await _settings.GetAsync();
-        foreach (var ch in (await _content.GetChannelsAsync(active.Id, settings.AdultContentBlocked))
+        var hide = _gate.ShouldHideAdultContent(settings.AdultContentBlocked);
+        foreach (var ch in (await _content.GetChannelsAsync(active.Id, hide))
                      .Where(c => string.Equals(c.Group, cat.Group, StringComparison.OrdinalIgnoreCase)))
         {
             PickerChannels.Add(ch);

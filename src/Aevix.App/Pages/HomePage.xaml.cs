@@ -11,6 +11,7 @@ public sealed partial class HomePage : Page
 
     public HomePage()
     {
+        NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Required;
         Vm = App.Services.GetRequiredService<HomeViewModel>();
         InitializeComponent();
         ContinueList.ItemsSource = Vm.ContinueWatching;

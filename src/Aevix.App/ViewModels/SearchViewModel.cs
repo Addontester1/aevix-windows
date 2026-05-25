@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using Aevix.Core.Models;
 using Aevix.Data.Dao;
+using Aevix_App.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Aevix_App.ViewModels;
@@ -14,6 +15,7 @@ public sealed partial class SearchViewModel : ObservableObject
     private readonly PlaylistRepository _playlists;
     private readonly ContentRepository _content;
     private readonly SettingsRepository _settings;
+    private readonly ParentalGate _gate;
 
     public ObservableCollection<Channel> Channels { get; } = new();
     public ObservableCollection<VodItem> Movies { get; } = new();
@@ -25,11 +27,12 @@ public sealed partial class SearchViewModel : ObservableObject
 
     private CancellationTokenSource? _cts;
 
-    public SearchViewModel(PlaylistRepository playlists, ContentRepository content, SettingsRepository settings)
+    public SearchViewModel(PlaylistRepository playlists, ContentRepository content, SettingsRepository settings, ParentalGate gate)
     {
         _playlists = playlists;
         _content = content;
         _settings = settings;
+        _gate = gate;
     }
 
     partial void OnQueryChanged(string value) => _ = DebouncedSearchAsync(value);
@@ -58,7 +61,8 @@ public sealed partial class SearchViewModel : ObservableObject
         try
         {
             var settings = await _settings.GetAsync(ct);
-            var results = await _content.SearchAsync(active.Id, query, settings.AdultContentBlocked, ct);
+            var hide = _gate.ShouldHideAdultContent(settings.AdultContentBlocked);
+            var results = await _content.SearchAsync(active.Id, query, hide, ct);
             foreach (var c in results.Channels) Channels.Add(c);
             foreach (var v in results.Vod) Movies.Add(v);
             foreach (var s in results.Series) Series.Add(s);

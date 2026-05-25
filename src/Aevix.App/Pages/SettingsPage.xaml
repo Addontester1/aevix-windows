@@ -72,14 +72,19 @@
                         <FontIcon Glyph="&#xE72E;" FontSize="18" />
                         <TextBlock Text="Parental controls" Style="{StaticResource SubtitleTextBlockStyle}" />
                     </StackPanel>
-                    <TextBlock x:Name="ParentalStatusText" Foreground="{ThemeResource AevixMutedTextBrush}" />
+                    <TextBlock x:Name="ParentalStatusText" Foreground="{ThemeResource AevixMutedTextBrush}" TextWrapping="Wrap" />
+                    <TextBlock Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource AevixMutedTextBrush}" TextWrapping="Wrap"
+                               Text="When blocking is on, adult categories are hidden everywhere. To view them this session, enter your PIN and click 'Unlock for this session' — the lock re-applies automatically next launch." />
                     <ToggleSwitch x:Name="AdultBlockToggle" Header="Block adult content"
                                   Toggled="AdultBlockToggle_Toggled" />
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <PasswordBox x:Name="PinBox" PlaceholderText="New / current PIN" Width="200" MaxLength="12" />
-                        <Button x:Name="SetPinButton"   Content="Set PIN"       Click="SetPin_Click"   Style="{StaticResource AccentButtonStyle}" />
-                        <Button x:Name="ClearPinButton" Content="Remove PIN"    Click="ClearPin_Click" />
+                        <PasswordBox x:Name="PinBox" PlaceholderText="PIN" Width="200" MaxLength="12" />
+                        <Button x:Name="SetPinButton"      Content="Set / update PIN" Click="SetPin_Click"      Style="{StaticResource AccentButtonStyle}" />
+                        <Button x:Name="UnlockSessionBtn"  Content="Unlock for this session" Click="UnlockSession_Click" />
+                        <Button x:Name="LockSessionBtn"    Content="Lock now"         Click="LockSession_Click" />
+                        <Button x:Name="ClearPinButton"    Content="Remove PIN"       Click="ClearPin_Click" />
                     </StackPanel>
+                    <TextBlock x:Name="SessionStatusText" Foreground="{ThemeResource AevixMutedTextBrush}" FontStyle="Italic" />
                 </StackPanel>
             </Border>
 

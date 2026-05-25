@@ -1,60 +1,75 @@
 using System.Runtime.InteropServices;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 using Windows.Graphics;
 
 namespace Aevix_App.Controls;
 
 /// <summary>
-/// A bare Win32 child <c>HWND</c> that libVLC can paint into, parented to
-/// the WinUI 3 main window. Necessary because WinUI 3 renders the whole
-/// frame through DirectComposition — handing libVLC the WinUI HWND results
-/// in the video being painted *behind* the WinUI compositor and never
-/// shown.
+/// A borderless top-level <c>HWND</c> that libVLC can paint into, *owned by*
+/// the WinUI 3 main window (not parented as a child).
+///
+/// Why not a WS_CHILD HWND? WinUI 3 renders its entire window through
+/// DirectComposition. Child HWNDs of a WinUI 3 window paint correctly at
+/// the OS level — but the WinUI compositor draws *over* them, so the
+/// video pixels exist but are invisible. The well-known fix is to use a
+/// borderless WS_POPUP top-level window with the WinUI HWND as its
+/// *owner*: owned popups render in their own Z-layer above the
+/// compositor and stay grouped with the main window for activation /
+/// taskbar purposes.
 ///
 /// Usage:
-///   - Construct one. Pass the WinUI <see cref="Window"/> as the parent.
-///   - Set <see cref="LayoutTarget"/> to a XAML element whose size /
-///     position the surface should mirror.
+///   - Construct with the WinUI <see cref="Window"/> as owner.
+///   - Call <see cref="Track"/> with a XAML element whose on-screen
+///     rectangle the overlay should mirror.
 ///   - Pass <see cref="Hwnd"/> to libVLC's <c>MediaPlayer.Hwnd</c>.
-///   - Call <see cref="Dispose"/> when the player page unloads.
+///   - <see cref="Dispose"/> when the player page unloads.
 /// </summary>
 public sealed class VideoChildWindow : IDisposable
 {
-    private const string ClassName = "AevixVideoChild";
-    private const int WS_CHILD = 0x40000000;
-    private const int WS_VISIBLE = 0x10000000;
+    private const string ClassName = "AevixVideoOverlay";
+
+    private const int WS_POPUP        = unchecked((int)0x80000000);
+    private const int WS_VISIBLE      = 0x10000000;
     private const int WS_CLIPSIBLINGS = 0x04000000;
-    private const uint SWP_NOZORDER = 0x0004;
+    private const int WS_EX_NOACTIVATE = 0x08000000;
+    private const int WS_EX_TOOLWINDOW = 0x00000080;
+
+    private const uint SWP_NOZORDER  = 0x0004;
     private const uint SWP_NOACTIVATE = 0x0010;
     private const uint SWP_SHOWWINDOW = 0x0040;
     private const uint SWP_HIDEWINDOW = 0x0080;
+    private const uint SWP_NOSIZE    = 0x0001;
+    private const uint SWP_NOMOVE    = 0x0002;
 
     private static IntPtr _hInstance;
     private static IntPtr _hbrBlack;
     private static WndProcDelegate? _wndProc;
     private static ushort _classAtom;
 
-    private readonly IntPtr _parentHwnd;
+    private readonly IntPtr _ownerHwnd;
+    private readonly Window _ownerWindow;
     private FrameworkElement? _layoutTarget;
     private bool _disposed;
 
     public IntPtr Hwnd { get; }
 
-    public VideoChildWindow(Window parent)
+    public VideoChildWindow(Window owner)
     {
-        _parentHwnd = WinRT.Interop.WindowNative.GetWindowHandle(parent);
+        _ownerWindow = owner;
+        _ownerHwnd = WinRT.Interop.WindowNative.GetWindowHandle(owner);
         EnsureClassRegistered();
 
-        // Create at (0,0) zero-sized — Resize() will reposition once XAML lays out.
+        // Top-level, borderless, owned by the WinUI window. WS_EX_TOOLWINDOW
+        // keeps it out of the taskbar; WS_EX_NOACTIVATE means clicking it
+        // doesn't steal focus from the WinUI window.
         Hwnd = CreateWindowEx(
-            dwExStyle: 0,
+            dwExStyle: (uint)(WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE),
             lpClassName: ClassName,
-            lpWindowName: "AevixVideoSurface",
-            dwStyle: WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS,
+            lpWindowName: "AevixVideoOverlay",
+            dwStyle: unchecked((uint)(WS_POPUP | WS_VISIBLE | WS_CLIPSIBLINGS)),
             x: 0, y: 0, nWidth: 0, nHeight: 0,
-            hWndParent: _parentHwnd,
+            hWndParent: _ownerHwnd,
             hMenu: IntPtr.Zero,
             hInstance: _hInstance,
             lpParam: IntPtr.Zero);
@@ -62,12 +77,16 @@ public sealed class VideoChildWindow : IDisposable
         {
             throw new InvalidOperationException($"CreateWindowEx failed (error {Marshal.GetLastWin32Error()}).");
         }
+
+        // Follow the owner window when it moves on screen.
+        owner.AppWindow.Changed += OwnerAppWindowChanged;
     }
 
     /// <summary>
     /// Mirror the size and on-screen position of the given XAML element.
-    /// Subscribes to <see cref="FrameworkElement.SizeChanged"/> so the
-    /// surface tracks layout updates (resize, splitter drags, etc.).
+    /// Subscribes to its layout-change events plus the owner window's
+    /// position-change so the overlay tracks both content scrolling and
+    /// window dragging.
     /// </summary>
     public void Track(FrameworkElement target)
     {
@@ -86,24 +105,42 @@ public sealed class VideoChildWindow : IDisposable
         _layoutTarget = null;
     }
 
-    public void Show() => SetWindowPos(Hwnd, IntPtr.Zero, 0, 0, 0, 0, SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW | 0x0001 /* SWP_NOSIZE */ | 0x0002 /* SWP_NOMOVE */);
-    public void Hide() => SetWindowPos(Hwnd, IntPtr.Zero, 0, 0, 0, 0, SWP_NOZORDER | SWP_NOACTIVATE | SWP_HIDEWINDOW | 0x0001 | 0x0002);
+    public void Hide() => SetWindowPos(Hwnd, IntPtr.Zero, 0, 0, 0, 0, SWP_NOZORDER | SWP_NOACTIVATE | SWP_HIDEWINDOW | SWP_NOMOVE | SWP_NOSIZE);
 
     private void OnLayoutChanged(object sender, Microsoft.UI.Xaml.SizeChangedEventArgs e) => Reposition();
     private void OnLayoutUpdated(object? sender, object e) => Reposition();
+    private void OwnerAppWindowChanged(Microsoft.UI.Windowing.AppWindow s, Microsoft.UI.Windowing.AppWindowChangedEventArgs e)
+    {
+        if (e.DidPositionChange || e.DidSizeChange) Reposition();
+    }
 
     private void Reposition()
     {
-        if (_layoutTarget is null || Hwnd == IntPtr.Zero) return;
-        // Translate the element's top-left from window-relative DIPs to
-        // physical pixels in the parent HWND's client area.
-        var dpi = _layoutTarget.XamlRoot?.RasterizationScale ?? 1.0;
-        var win = _layoutTarget.TransformToVisual(null).TransformPoint(new Windows.Foundation.Point(0, 0));
+        if (_disposed || _layoutTarget is null || Hwnd == IntPtr.Zero) return;
+        var root = _layoutTarget.XamlRoot;
+        if (root is null) return;
+        var dpi = root.RasterizationScale;
         var w = (int)(_layoutTarget.ActualWidth * dpi);
         var h = (int)(_layoutTarget.ActualHeight * dpi);
-        var x = (int)(win.X * dpi);
-        var y = (int)(win.Y * dpi);
         if (w <= 0 || h <= 0) return;
+
+        // Element coords relative to the XAML root (i.e. the WinUI window
+        // client area, including the title bar since we extend into it).
+        Windows.Foundation.Point inWindow;
+        try
+        {
+            inWindow = _layoutTarget.TransformToVisual(null).TransformPoint(new Windows.Foundation.Point(0, 0));
+        }
+        catch
+        {
+            return; // not in the tree yet
+        }
+
+        // Convert to physical pixels then add the owner window's screen origin.
+        var ownerPos = _ownerWindow.AppWindow.Position; // physical pixels
+        var x = ownerPos.X + (int)(inWindow.X * dpi);
+        var y = ownerPos.Y + (int)(inWindow.Y * dpi);
+
         SetWindowPos(Hwnd, IntPtr.Zero, x, y, w, h, SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
     }
 
@@ -111,6 +148,7 @@ public sealed class VideoChildWindow : IDisposable
     {
         if (_disposed) return;
         _disposed = true;
+        try { _ownerWindow.AppWindow.Changed -= OwnerAppWindowChanged; } catch { }
         Untrack();
         if (Hwnd != IntPtr.Zero)
         {

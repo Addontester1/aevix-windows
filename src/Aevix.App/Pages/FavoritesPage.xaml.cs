@@ -19,6 +19,11 @@ public sealed partial class FavoritesPage : Page
         {
             if (e.PropertyName == nameof(Vm.StatusText)) StatusText.Text = Vm.StatusText;
         };
-        Loaded += async (_, _) => await Vm.LoadAsync();
+    }
+
+    protected override async void OnNavigatedTo(Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        await Vm.LoadAsync();
     }
 }

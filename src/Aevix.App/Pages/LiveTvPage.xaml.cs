@@ -27,18 +27,43 @@ public sealed partial class LiveTvPage : Page
             if (e.PropertyName == nameof(Vm.StatusText)) StatusText.Text = Vm.StatusText;
         };
         Vm.Channels.CollectionChanged += (_, _) => UpdateEmptyState();
-        Loaded += async (_, _) =>
+        Loaded += (_, _) => UpdateEmptyState();
+    }
+
+    /// <summary>
+    /// Reload the active playlist's categories every time we navigate
+    /// here. Preserves the user's current category selection by Group
+    /// name so a no-op nav doesn't clear their place; if the category
+    /// disappeared (e.g. they switched to a freshly-synced playlist),
+    /// selection is dropped and they pick from the new list.
+    /// </summary>
+    protected override async void OnNavigatedTo(Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        var previousGroup = Vm.SelectedCategory?.Group;
+        await Vm.LoadAsync();
+        _initialLoadDone = true;
+        if (previousGroup is not null)
         {
-            // Page is cached — only do the initial expensive load once. On
-            // subsequent visits the categories + selected channel list are
-            // already populated.
-            if (!_initialLoadDone)
+            var match = Vm.Categories.FirstOrDefault(c =>
+                string.Equals(c.Group, previousGroup, StringComparison.OrdinalIgnoreCase));
+            if (match is not null && !ReferenceEquals(match, Vm.SelectedCategory))
             {
-                await Vm.LoadAsync();
-                _initialLoadDone = true;
+                // Re-assign with the *new* CategoryCount instance so the
+                // change handler fires and channels reload against the
+                // current data.
+                Vm.SelectedCategory = match;
+                CategoryList.SelectedItem = match;
             }
-            UpdateEmptyState();
-        };
+            else if (match is null)
+            {
+                // Stale selection — drop it so the user picks again.
+                Vm.SelectedCategory = null;
+                CategoryList.SelectedItem = null;
+                Vm.Channels.Clear();
+            }
+        }
+        UpdateEmptyState();
     }
 
     private void UpdateEmptyState()

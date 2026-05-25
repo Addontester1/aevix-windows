@@ -27,7 +27,15 @@ public sealed partial class PlaylistsPage : Page
         };
 
         Vm.Playlists.CollectionChanged += (_, _) => UpdateEmptyState();
-        Loaded += async (_, _) => { await Vm.LoadAsync(); UpdateEmptyState(); };
+        Loaded += (_, _) => UpdateEmptyState();
+    }
+
+    /// <summary>Reload list on every nav — the user may have just added or edited a playlist on the form page.</summary>
+    protected override async void OnNavigatedTo(Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        await Vm.LoadAsync();
+        UpdateEmptyState();
     }
 
     private void UpdateEmptyState()

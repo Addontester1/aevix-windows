@@ -23,11 +23,15 @@ public sealed partial class SeriesPage : Page
             if (e.PropertyName == nameof(Vm.StatusText)) StatusText.Text = Vm.StatusText;
         };
         Vm.AllSeries.CollectionChanged += (_, _) => UpdateEmptyState();
-        Loaded += async (_, _) =>
-        {
-            if (!_initialLoadDone) { await Vm.LoadAsync(); _initialLoadDone = true; }
-            UpdateEmptyState();
-        };
+        Loaded += (_, _) => UpdateEmptyState();
+    }
+
+    protected override async void OnNavigatedTo(Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        await Vm.LoadAsync();
+        _initialLoadDone = true;
+        UpdateEmptyState();
     }
 
     private void UpdateEmptyState()

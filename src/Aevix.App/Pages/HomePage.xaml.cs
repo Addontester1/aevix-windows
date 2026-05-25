@@ -16,7 +16,13 @@ public sealed partial class HomePage : Page
         InitializeComponent();
         ContinueList.ItemsSource = Vm.ContinueWatching;
         OtherPlaylistsList.ItemsSource = Vm.OtherPlaylists;
-        Loaded += async (_, _) => await RefreshAsync();
+    }
+
+    /// <summary>Refresh on every nav — the hero card needs to reflect the just-synced playlist counts.</summary>
+    protected override async void OnNavigatedTo(Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        await RefreshAsync();
     }
 
     private async Task RefreshAsync()

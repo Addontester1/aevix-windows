@@ -24,6 +24,14 @@ public sealed class AevixPlayer : IDisposable
     public LibVLC LibVlc => _libVlc ?? throw new InvalidOperationException("Call InitializeAsync first.");
     public MediaPlayer MediaPlayer => _mediaPlayer ?? throw new InvalidOperationException("Call InitializeAsync first.");
 
+    /// <summary>
+    /// True when <see cref="InitializeAsync"/> has completed at least once.
+    /// Callers that may run before Initialize finishes (e.g. fast
+    /// navigate-then-back) should check this before touching
+    /// <see cref="MediaPlayer"/>.
+    /// </summary>
+    public bool IsInitialized => _initialized && _mediaPlayer is not null;
+
     public bool IsPlaying => _mediaPlayer?.IsPlaying ?? false;
 
     public long PositionMs
@@ -99,6 +107,28 @@ public sealed class AevixPlayer : IDisposable
     public void Pause() => _mediaPlayer?.Pause();
     public void Resume() { if (_mediaPlayer is { IsPlaying: false }) _mediaPlayer.Play(); }
     public void Stop() => _mediaPlayer?.Stop();
+
+    /// <summary>
+    /// Mints an additional <see cref="MediaPlayer"/> on the shared libVLC
+    /// instance. Multi-screen creates one of these per cell so each video
+    /// renders to its own HWND independently of the main player.
+    ///
+    /// The caller owns the returned object — it must <see cref="MediaPlayer.Dispose"/>
+    /// it when done. libVLC handles concurrent MediaPlayer instances natively.
+    /// </summary>
+    public MediaPlayer CreateAdditionalMediaPlayer()
+    {
+        if (_libVlc is null) throw new InvalidOperationException("Call InitializeAsync first.");
+        return new MediaPlayer(_libVlc);
+    }
+
+    /// <summary>Play a URL on a caller-owned MediaPlayer (used by multi-screen cells).</summary>
+    public void PlayOn(MediaPlayer mp, string url)
+    {
+        if (_libVlc is null) throw new InvalidOperationException("Call InitializeAsync first.");
+        using var media = new Media(_libVlc, new Uri(url));
+        mp.Play(media);
+    }
 
     public void Dispose()
     {

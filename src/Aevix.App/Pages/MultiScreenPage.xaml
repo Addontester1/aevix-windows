@@ -5,10 +5,94 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:m="using:Aevix.Core.Models"
     mc:Ignorable="d">
-    <StackPanel Padding="24" Spacing="12">
-        <TextBlock Text="Multi-Screen" Style="{StaticResource TitleTextBlockStyle}" />
-        <TextBlock x:Name="StatusText" Opacity="0.7" />
-        <InfoBar Title="Coming soon" Message="Multi-cell live grid lands after the single-stream player path is solid." Severity="Informational" IsOpen="True" IsClosable="False" />
-    </StackPanel>
+    <Grid>
+        <!-- Layout picker (shown when Layout == 0) -->
+        <Grid x:Name="LayoutPicker" Background="#FF101010">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16" MaxWidth="640">
+                <TextBlock Text="Multi-Screen" Style="{StaticResource TitleLargeTextBlockStyle}" Foreground="White" HorizontalAlignment="Center" />
+                <TextBlock Text="Watch up to four channels at once. Click a cell to pick a channel."
+                           Foreground="{ThemeResource AevixMutedTextBrush}" HorizontalAlignment="Center" />
+                <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center" Margin="0,16,0,0">
+                    <Button Content="2 cells" Click="Layout2_Click" MinWidth="120" Style="{StaticResource AccentButtonStyle}" />
+                    <Button Content="3 cells" Click="Layout3_Click" MinWidth="120" Style="{StaticResource AccentButtonStyle}" />
+                    <Button Content="4 cells" Click="Layout4_Click" MinWidth="120" Style="{StaticResource AccentButtonStyle}" />
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+
+        <!-- Cell grid (shown when Layout > 0) -->
+        <Grid x:Name="CellSurface" Visibility="Collapsed" Background="Black">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Border Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}" Padding="12,8">
+                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <TextBlock x:Name="StatusText" Foreground="White" VerticalAlignment="Center" />
+                    <AppBarSeparator />
+                    <Button Content="Change layout" Click="ChangeLayout_Click" />
+                </StackPanel>
+            </Border>
+
+            <Grid x:Name="CellGrid" Grid.Row="1" Padding="6" RowSpacing="6" ColumnSpacing="6" />
+        </Grid>
+
+        <!-- Channel picker overlay -->
+        <Grid x:Name="PickerOverlay" Visibility="Collapsed" Background="#CC000000">
+            <Border Background="{ThemeResource SolidBackgroundFillColorBaseBrush}" CornerRadius="{StaticResource AevixCardCornerRadius}"
+                    MaxWidth="900" MaxHeight="640" Margin="40" Padding="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid Padding="16,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Pick a channel" Style="{StaticResource SubtitleTextBlockStyle}" />
+                        <Button Grid.Column="1" Content="Close" Click="ClosePicker_Click" />
+                    </Grid>
+                    <Grid Grid.Row="1" ColumnSpacing="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="240" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <ListView x:Name="PickerCategoryList" SelectionMode="Single" SelectionChanged="PickerCategory_SelectionChanged">
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="m:CategoryCount">
+                                    <Grid Padding="0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{x:Bind Group}" MaxLines="1" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Grid.Column="1" Text="{x:Bind Count}" Opacity="0.55" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                        <ListView x:Name="PickerChannelList" Grid.Column="1" SelectionMode="Single" DoubleTapped="PickerChannel_DoubleTapped">
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="m:Channel">
+                                    <Grid Padding="8,6" ColumnSpacing="10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="32" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Image Source="{x:Bind LogoUrl}" Width="28" Height="28" Stretch="Uniform" />
+                                        <TextBlock Grid.Column="1" Text="{x:Bind Name}" VerticalAlignment="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
 </Page>

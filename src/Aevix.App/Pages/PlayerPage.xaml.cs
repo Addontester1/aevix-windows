@@ -63,10 +63,17 @@ public sealed partial class PlayerPage : Page
 
     private void PlayerPage_Unloaded(object sender, RoutedEventArgs e)
     {
-        Vm.Player.Stop();
-        if (Vm.Player.MediaPlayer is { } mp)
+        // Defensive: the page can unload before InitializeAsync finishes
+        // (e.g. user clicks Back immediately). Touching MediaPlayer in that
+        // window throws.
+        if (Vm.Player.IsInitialized)
         {
-            mp.Hwnd = IntPtr.Zero;
+            try
+            {
+                Vm.Player.Stop();
+                Vm.Player.MediaPlayer.Hwnd = IntPtr.Zero;
+            }
+            catch { /* swallow: cleanup must not crash */ }
         }
         _surface?.Dispose();
         _surface = null;

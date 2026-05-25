@@ -10,12 +10,6 @@ public sealed partial class EpgViewModel : ObservableObject
     [ObservableProperty] private string _statusText = "EPG coming soon.";
 }
 
-/// <summary>Multi-screen — placeholder shell.</summary>
-public sealed partial class MultiScreenViewModel : ObservableObject
-{
-    [ObservableProperty] private string _statusText = "Multi-screen coming soon.";
-}
-
 /// <summary>
 /// Parental-PIN gate. We hash the PIN with PBKDF2 + a per-user salt so the
 /// stored value isn't directly invertible — same approach as the Android app.

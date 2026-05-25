@@ -166,7 +166,33 @@ public sealed partial class SettingsViewModel : ObservableObject
         return true;
     }
 
-    /// <summary>Verify the entered PIN before removing it / unblocking adult content.</summary>
+    /// <summary>
+    /// Verify the entered PIN and *unblock* adult content. Leaves the PIN
+    /// itself in place — the user can re-block any time without re-entering
+    /// a fresh PIN. Use <see cref="VerifyAndClearPinAsync"/> to actually
+    /// remove the PIN.
+    /// </summary>
+    public async Task<bool> VerifyAndUnblockAdultAsync(string pin, CancellationToken ct = default)
+    {
+        var s = await _settings.GetAsync(ct);
+        if (string.IsNullOrWhiteSpace(s.ParentalPinHash) || string.IsNullOrWhiteSpace(s.ParentalPinSalt))
+        {
+            // No PIN configured — toggling is free.
+            AdultContentBlocked = false;
+            return true;
+        }
+        var match = string.Equals(ParentalViewModel.HashPin(pin, s.ParentalPinSalt), s.ParentalPinHash, StringComparison.Ordinal);
+        if (!match) { ParentalStatus = "Wrong PIN."; return false; }
+        await _settings.SaveAsync(s with { AdultContentBlocked = false }, ct);
+        AdultContentBlocked = false;
+        ParentalStatus = "PIN verified — adult content unblocked. Toggle on again any time to re-block.";
+        return true;
+    }
+
+    /// <summary>
+    /// Verify the entered PIN and *remove* it entirely. Also unblocks adult
+    /// content (since there's no PIN to gate it anymore).
+    /// </summary>
     public async Task<bool> VerifyAndClearPinAsync(string pin, CancellationToken ct = default)
     {
         var s = await _settings.GetAsync(ct);

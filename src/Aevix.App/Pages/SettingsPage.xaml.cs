@@ -88,9 +88,12 @@ public sealed partial class SettingsPage : Page
     }
 
     /// <summary>
-    /// When the PIN is set, the user can only turn adult content back ON
-    /// freely — turning it OFF requires the PIN. We snap the toggle back
-    /// and ask for verification.
+    /// Adult-content toggle behaviour:
+    ///   - No PIN set → toggle freely.
+    ///   - PIN set, turning ON → allowed (only tightens security).
+    ///   - PIN set, turning OFF → verify PIN, but **keep the PIN in place**
+    ///     so the user can re-block any time without recreating it. To
+    ///     actually remove the PIN, use the dedicated "Remove PIN" button.
     /// </summary>
     private async void AdultBlockToggle_Toggled(object sender, RoutedEventArgs e)
     {
@@ -102,21 +105,23 @@ public sealed partial class SettingsPage : Page
         }
         if (AdultBlockToggle.IsOn)
         {
-            // Allowed to block without PIN — turning it on only tightens.
+            // Re-block is free — no PIN required to TIGHTEN security.
             Vm.AdultContentBlocked = true;
+            Vm.ParentalStatus = "Adult content is blocked.";
             return;
         }
-        // User is trying to unblock — require PIN.
+        // User wants to unblock — require PIN, but leave the PIN itself set.
         var pin = PinBox.Password;
         if (string.IsNullOrEmpty(pin))
         {
             AdultBlockToggle.IsOn = true;
-            Vm.ParentalStatus = "Enter your PIN in the box below to unblock adult content.";
+            Vm.ParentalStatus = "Enter your PIN in the box below, then toggle this switch off again to unblock.";
             return;
         }
-        var ok = await Vm.VerifyAndClearPinAsync(pin);
+        var ok = await Vm.VerifyAndUnblockAdultAsync(pin);
         if (!ok)
         {
+            // Wrong PIN — snap the toggle back so it stays in sync with state.
             AdultBlockToggle.IsOn = true;
         }
         else

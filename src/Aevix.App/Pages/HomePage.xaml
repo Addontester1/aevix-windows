@@ -49,7 +49,7 @@
                             <DataTemplate x:DataType="m:PlaybackProgress">
                                 <Border Width="220" Height="140" CornerRadius="{StaticResource AevixPosterCornerRadius}" Background="{ThemeResource AevixCardBrush}">
                                     <Grid>
-                                        <Image Source="{x:Bind PosterUrl}" Stretch="UniformToFill" Opacity="0.85" />
+                                        <Image Source="{x:Bind PosterUrl, Converter={StaticResource SafeImageSource}}" Stretch="UniformToFill" Opacity="0.85" />
                                         <Border VerticalAlignment="Bottom" Background="#AA000000" Padding="10,6">
                                             <StackPanel Spacing="2">
                                                 <TextBlock Text="{x:Bind ItemTitle}" Foreground="White" FontWeight="SemiBold" MaxLines="1" TextTrimming="CharacterEllipsis" />

@@ -84,7 +84,7 @@
                                             <ColumnDefinition Width="32" />
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
-                                        <Image Source="{x:Bind LogoUrl}" Width="28" Height="28" Stretch="Uniform" />
+                                        <Image Source="{x:Bind LogoUrl, Converter={StaticResource SafeImageSource}}" Width="28" Height="28" Stretch="Uniform" />
                                         <TextBlock Grid.Column="1" Text="{x:Bind Name}" VerticalAlignment="Center" />
                                     </Grid>
                                 </DataTemplate>

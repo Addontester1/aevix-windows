@@ -70,7 +70,7 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <Border Width="40" Height="40" CornerRadius="6" Background="{ThemeResource AevixCardBrush}">
-                                <Image Source="{x:Bind LogoUrl}" Stretch="Uniform" />
+                                <Image Source="{x:Bind LogoUrl, Converter={StaticResource SafeImageSource}}" Stretch="Uniform" />
                             </Border>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                 <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" />

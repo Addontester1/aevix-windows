@@ -3,13 +3,20 @@
     x:Class="Aevix_App.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:Aevix_App">
+    xmlns:local="using:Aevix_App"
+    xmlns:conv="using:Aevix_App.Converters">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
                 <ResourceDictionary Source="ms-appx:///Themes/AevixColors.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            <!--
+                Global converter — see Converters/SafeImageSourceConverter.cs.
+                Any Image.Source binding that takes a remote URL string should
+                go through this so malformed URLs don't crash the page.
+            -->
+            <conv:SafeImageSourceConverter x:Key="SafeImageSource" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

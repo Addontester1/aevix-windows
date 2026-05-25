@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+    Aevix brand tokens. The coral accent (#FF7E63) and teal complement
+    (#1FB6A8) match the Android logo so all three apps look like one
+    product family.
+-->
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Default">
+            <Color x:Key="AevixCoral">#FFFF7E63</Color>
+            <Color x:Key="AevixTeal">#FF1FB6A8</Color>
+            <SolidColorBrush x:Key="AevixCoralBrush" Color="{StaticResource AevixCoral}" />
+            <SolidColorBrush x:Key="AevixTealBrush" Color="{StaticResource AevixTeal}" />
+            <SolidColorBrush x:Key="AevixCardBrush" Color="#22FFFFFF" />
+            <SolidColorBrush x:Key="AevixCardHoverBrush" Color="#33FFFFFF" />
+            <SolidColorBrush x:Key="AevixMutedTextBrush" Color="#B0FFFFFF" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Light">
+            <Color x:Key="AevixCoral">#FFE25C40</Color>
+            <Color x:Key="AevixTeal">#FF0F8F83</Color>
+            <SolidColorBrush x:Key="AevixCoralBrush" Color="{StaticResource AevixCoral}" />
+            <SolidColorBrush x:Key="AevixTealBrush" Color="{StaticResource AevixTeal}" />
+            <SolidColorBrush x:Key="AevixCardBrush" Color="#11000000" />
+            <SolidColorBrush x:Key="AevixCardHoverBrush" Color="#1A000000" />
+            <SolidColorBrush x:Key="AevixMutedTextBrush" Color="#A0000000" />
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+
+    <!-- Shared, theme-independent values. -->
+    <CornerRadius x:Key="AevixCardCornerRadius">12</CornerRadius>
+    <CornerRadius x:Key="AevixPosterCornerRadius">8</CornerRadius>
+    <Thickness     x:Key="AevixSectionPadding">24,16,24,16</Thickness>
+    <Thickness     x:Key="AevixCardPadding">16</Thickness>
+</ResourceDictionary>

@@ -6,38 +6,100 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:m="using:Aevix.Core.Models"
+    xmlns:vm="using:Aevix_App.Models"
     mc:Ignorable="d">
-    <Grid Padding="16" RowSpacing="12">
+    <Grid Padding="24" RowSpacing="16">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <StackPanel Orientation="Horizontal" Spacing="8">
-            <Button Content="Add playlist" Click="Add_Click" />
-            <Button Content="Sync selected" Click="Sync_Click" />
-            <Button Content="Set active" Click="Activate_Click" />
-            <Button Content="Delete" Click="Delete_Click" />
-        </StackPanel>
-        <TextBlock x:Name="SyncStatus" Grid.Row="1" Opacity="0.7" />
-        <ListView x:Name="PlaylistList" Grid.Row="2">
+
+        <!-- Header -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel>
+                <TextBlock Text="Playlists" Style="{StaticResource TitleLargeTextBlockStyle}" />
+                <TextBlock Text="One playlist is active at a time. Sync any of them to pull the latest channels, movies, and series."
+                           Foreground="{ThemeResource AevixMutedTextBrush}" />
+            </StackPanel>
+            <Button Grid.Column="1" Content="Add playlist" Click="Add_Click" Style="{StaticResource AccentButtonStyle}" />
+        </Grid>
+
+        <ProgressBar x:Name="SyncProgress" Grid.Row="1" IsIndeterminate="True" Visibility="Collapsed" />
+        <TextBlock   x:Name="SyncStatus"   Grid.Row="2" Foreground="{ThemeResource AevixMutedTextBrush}" />
+
+        <!-- Empty state -->
+        <Grid Grid.Row="3" x:Name="EmptyState" Visibility="Collapsed" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <StackPanel Spacing="8" HorizontalAlignment="Center">
+                <FontIcon Glyph="&#xE8FD;" FontSize="48" Foreground="{ThemeResource AevixMutedTextBrush}" />
+                <TextBlock Text="No playlists yet" Style="{StaticResource SubtitleTextBlockStyle}" HorizontalAlignment="Center" />
+                <TextBlock Text="Add an M3U URL, Xtream Codes credentials, or a Stalker portal to get started."
+                           Foreground="{ThemeResource AevixMutedTextBrush}" HorizontalAlignment="Center" />
+                <Button Content="Add playlist" Click="Add_Click" Style="{StaticResource AccentButtonStyle}" HorizontalAlignment="Center" Margin="0,8,0,0" />
+            </StackPanel>
+        </Grid>
+
+        <ListView x:Name="PlaylistList" Grid.Row="3" SelectionMode="Single">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="Padding" Value="0" />
+                </Style>
+            </ListView.ItemContainerStyle>
             <ListView.ItemTemplate>
-                <DataTemplate x:DataType="m:Playlist">
-                    <Grid Padding="8,6">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <StackPanel>
-                            <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" />
-                            <TextBlock Text="{x:Bind Url}" Opacity="0.7" FontSize="12" />
-                        </StackPanel>
-                        <TextBlock Grid.Column="1" VerticalAlignment="Center" Opacity="0.7">
-                            <Run Text="{x:Bind ChannelCount}" /><Run Text=" ch / " /><Run Text="{x:Bind VodCount}" /><Run Text=" vod / " /><Run Text="{x:Bind SeriesCount}" /><Run Text=" series" />
-                        </TextBlock>
-                    </Grid>
+                <DataTemplate x:DataType="vm:PlaylistView">
+                    <Border Background="{ThemeResource AevixCardBrush}"
+                            CornerRadius="{StaticResource AevixCardCornerRadius}"
+                            Padding="16,12" Margin="0,4">
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Active dot -->
+                            <Ellipse Width="10" Height="10" VerticalAlignment="Center"
+                                     Fill="{x:Bind ActiveFill}" />
+
+                            <StackPanel Grid.Column="1" Spacing="2">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" />
+                                    <Border Background="{ThemeResource AevixCardHoverBrush}" CornerRadius="6" Padding="6,1">
+                                        <TextBlock Text="{x:Bind Type}" FontSize="11" />
+                                    </Border>
+                                </StackPanel>
+                                <TextBlock Text="{x:Bind Url}" FontSize="12" Foreground="{ThemeResource AevixMutedTextBrush}" MaxLines="1" TextTrimming="CharacterEllipsis" />
+                                <TextBlock FontSize="12" Foreground="{ThemeResource AevixMutedTextBrush}">
+                                    <Run Text="{x:Bind ChannelCount}" /><Run Text=" channels · " /><Run Text="{x:Bind VodCount}" /><Run Text=" movies · " /><Run Text="{x:Bind SeriesCount}" /><Run Text=" series" />
+                                </TextBlock>
+                                <TextBlock x:Name="ErrorText" Text="{x:Bind LastError}" Foreground="OrangeRed" FontSize="12"
+                                           Visibility="{x:Bind HasError}" />
+                            </StackPanel>
+
+                            <TextBlock Grid.Column="2" VerticalAlignment="Center" Foreground="{ThemeResource AevixMutedTextBrush}" FontSize="12"
+                                       Text="{x:Bind LastSyncText}" />
+                        </Grid>
+                    </Border>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
+
+        <!-- Floating action bar -->
+        <Border Grid.Row="3" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,16,16"
+                Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+                CornerRadius="{StaticResource AevixCardCornerRadius}" Padding="12,8">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Content="Sync"        Click="Sync_Click" />
+                <Button Content="Set active"  Click="Activate_Click" />
+                <Button Content="Delete"      Click="Delete_Click" />
+            </StackPanel>
+        </Border>
     </Grid>
 </Page>

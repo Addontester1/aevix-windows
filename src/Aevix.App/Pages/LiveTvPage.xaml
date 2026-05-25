@@ -7,50 +7,76 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:m="using:Aevix.Core.Models"
     mc:Ignorable="d">
-    <Grid Padding="16">
+    <Grid Padding="24" ColumnSpacing="20">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="280" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <Grid Grid.Column="0">
+        <!-- Categories sidebar -->
+        <Border Background="{ThemeResource AevixCardBrush}" CornerRadius="{StaticResource AevixCardCornerRadius}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock Text="Categories" Style="{StaticResource SubtitleTextBlockStyle}" Padding="16,12,16,8" />
+                <ListView x:Name="CategoryList" Grid.Row="1" SelectionMode="Single" SelectionChanged="CategoryList_SelectionChanged">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="m:CategoryCount">
+                            <Grid Padding="0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{x:Bind Group}" MaxLines="1" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Grid.Column="1" Text="{x:Bind Count}" Opacity="0.55" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Column="1" RowSpacing="12">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <TextBlock Text="Categories" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,8" />
-            <ListView x:Name="CategoryList" Grid.Row="1" SelectionChanged="CategoryList_SelectionChanged">
+            <StackPanel Spacing="2">
+                <TextBlock Text="Live TV" Style="{StaticResource TitleLargeTextBlockStyle}" />
+                <TextBlock x:Name="StatusText" Foreground="{ThemeResource AevixMutedTextBrush}" />
+            </StackPanel>
+
+            <Grid Grid.Row="1" x:Name="EmptyState" Visibility="Collapsed" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <StackPanel Spacing="8" HorizontalAlignment="Center">
+                    <FontIcon Glyph="&#xE7F4;" FontSize="48" Foreground="{ThemeResource AevixMutedTextBrush}" />
+                    <TextBlock Text="Pick a category on the left" Foreground="{ThemeResource AevixMutedTextBrush}" />
+                </StackPanel>
+            </Grid>
+
+            <ListView x:Name="ChannelList" Grid.Row="1" DoubleTapped="ChannelList_DoubleTapped" SelectionMode="Single">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    </Style>
+                </ListView.ItemContainerStyle>
                 <ListView.ItemTemplate>
-                    <DataTemplate x:DataType="m:CategoryCount">
-                        <Grid Padding="8,4">
+                    <DataTemplate x:DataType="m:Channel">
+                        <Grid Padding="8,8" ColumnSpacing="12">
                             <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="48" />
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="{x:Bind Group}" />
-                            <TextBlock Grid.Column="1" Text="{x:Bind Count}" Opacity="0.6" />
-                        </Grid>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-        </Grid>
-
-        <Grid Grid.Column="1" Margin="16,0,0,0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <TextBlock x:Name="StatusText" Style="{StaticResource SubtitleTextBlockStyle}" />
-            <ListView x:Name="ChannelList" Grid.Row="1" DoubleTapped="ChannelList_DoubleTapped">
-                <ListView.ItemTemplate>
-                    <DataTemplate x:DataType="m:Channel">
-                        <Grid Padding="8,6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="36" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Image Width="32" Height="32" Source="{x:Bind LogoUrl}" />
-                            <TextBlock Grid.Column="1" Margin="12,0,0,0" Text="{x:Bind Name}" VerticalAlignment="Center" />
+                            <Border Width="40" Height="40" CornerRadius="6" Background="{ThemeResource AevixCardBrush}">
+                                <Image Source="{x:Bind LogoUrl}" Stretch="Uniform" />
+                            </Border>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" />
+                                <TextBlock Text="{x:Bind Group}" FontSize="11" Foreground="{ThemeResource AevixMutedTextBrush}" />
+                            </StackPanel>
+                            <FontIcon Grid.Column="2" Glyph="&#xE768;" FontSize="14" Foreground="{ThemeResource AevixMutedTextBrush}" VerticalAlignment="Center" />
                         </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>

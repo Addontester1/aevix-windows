@@ -7,42 +7,72 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:m="using:Aevix.Core.Models"
     mc:Ignorable="d">
-    <Grid Padding="16">
+    <Grid Padding="24" ColumnSpacing="20">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="280" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <ListView x:Name="CategoryList" SelectionChanged="CategoryList_SelectionChanged">
-            <ListView.ItemTemplate>
-                <DataTemplate x:DataType="m:CategoryCount">
-                    <Grid Padding="8,4">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="{x:Bind Group}" />
-                        <TextBlock Grid.Column="1" Text="{x:Bind Count}" Opacity="0.6" />
-                    </Grid>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
-        <Grid Grid.Column="1" Margin="16,0,0,0">
+
+        <!-- Categories sidebar -->
+        <Border Background="{ThemeResource AevixCardBrush}" CornerRadius="{StaticResource AevixCardCornerRadius}" Padding="0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock Text="Categories" Style="{StaticResource SubtitleTextBlockStyle}" Padding="16,12,16,8" />
+                <ListView x:Name="CategoryList" Grid.Row="1" SelectionMode="Single" SelectionChanged="CategoryList_SelectionChanged">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="m:CategoryCount">
+                            <Grid Padding="0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{x:Bind Group}" MaxLines="1" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Grid.Column="1" Text="{x:Bind Count}" Opacity="0.55" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Column="1" RowSpacing="12">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <TextBlock x:Name="StatusText" Style="{StaticResource SubtitleTextBlockStyle}" />
-            <GridView x:Name="MovieGrid" Grid.Row="1" DoubleTapped="MovieGrid_DoubleTapped">
+            <StackPanel Spacing="2">
+                <TextBlock Text="Movies" Style="{StaticResource TitleLargeTextBlockStyle}" />
+                <TextBlock x:Name="StatusText" Foreground="{ThemeResource AevixMutedTextBrush}" />
+            </StackPanel>
+
+            <!-- Empty state -->
+            <Grid Grid.Row="1" x:Name="EmptyState" Visibility="Collapsed" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <StackPanel Spacing="8" HorizontalAlignment="Center">
+                    <FontIcon Glyph="&#xE8B2;" FontSize="48" Foreground="{ThemeResource AevixMutedTextBrush}" />
+                    <TextBlock Text="Pick a category to browse" Foreground="{ThemeResource AevixMutedTextBrush}" />
+                </StackPanel>
+            </Grid>
+
+            <GridView x:Name="MovieGrid" Grid.Row="1" DoubleTapped="MovieGrid_DoubleTapped" SelectionMode="Single">
                 <GridView.ItemTemplate>
                     <DataTemplate x:DataType="m:VodItem">
-                        <Grid Width="160" Height="240" Padding="4">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-                            <Image Source="{x:Bind PosterUrl}" Stretch="UniformToFill" />
-                            <TextBlock Grid.Row="1" Text="{x:Bind Title}" TextWrapping="Wrap" MaxLines="2" />
-                        </Grid>
+                        <Border Width="170" Height="280" Margin="4" CornerRadius="{StaticResource AevixPosterCornerRadius}"
+                                Background="{ThemeResource AevixCardBrush}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Image Source="{x:Bind PosterUrl}" Stretch="UniformToFill" />
+                                <StackPanel Grid.Row="1" Padding="8,6" Spacing="2">
+                                    <TextBlock Text="{x:Bind Title}" MaxLines="2" TextTrimming="CharacterEllipsis" FontSize="12" />
+                                    <TextBlock Text="{x:Bind Genre}" FontSize="10" Foreground="{ThemeResource AevixMutedTextBrush}" MaxLines="1" TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
                     </DataTemplate>
                 </GridView.ItemTemplate>
             </GridView>

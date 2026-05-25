@@ -6,16 +6,88 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     mc:Ignorable="d">
-    <ScrollViewer>
-        <StackPanel Padding="24" Spacing="12" MaxWidth="640" HorizontalAlignment="Left">
-            <TextBlock Text="Settings" Style="{StaticResource TitleTextBlockStyle}" />
-            <ToggleSwitch x:Name="AutoPlayToggle"  Header="Auto-play next item" />
-            <ToggleSwitch x:Name="ContinueToggle"  Header="Continue watching enabled" />
-            <ToggleSwitch x:Name="EpgRefreshToggle" Header="Auto-refresh EPG" />
-            <ToggleSwitch x:Name="AdultBlockToggle" Header="Block adult content" />
-            <NumberBox     x:Name="EpgOffsetBox"    Header="EPG offset (minutes)" SpinButtonPlacementMode="Inline" Minimum="-720" Maximum="720" />
-            <Button Content="Save" Click="Save_Click" Style="{StaticResource AccentButtonStyle}" />
-            <Button Content="Open parental settings" Click="Parental_Click" />
+    <ScrollViewer Padding="24">
+        <StackPanel Spacing="20" MaxWidth="760" HorizontalAlignment="Left">
+            <StackPanel Spacing="4">
+                <TextBlock Text="Settings" Style="{StaticResource TitleLargeTextBlockStyle}" />
+                <TextBlock Text="Configure playback, EPG, and content controls." Style="{StaticResource BodyTextBlockStyle}" Foreground="{ThemeResource AevixMutedTextBrush}" />
+            </StackPanel>
+
+            <!-- General -->
+            <Border Background="{ThemeResource AevixCardBrush}" CornerRadius="{StaticResource AevixCardCornerRadius}" Padding="{StaticResource AevixCardPadding}">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="General" Style="{StaticResource SubtitleTextBlockStyle}" />
+                    <ToggleSwitch x:Name="AutoPlayToggle" Header="Auto-play next item" />
+                    <ToggleSwitch x:Name="ContinueToggle" Header="Continue-watching enabled" />
+                </StackPanel>
+            </Border>
+
+            <!-- Player -->
+            <Border Background="{ThemeResource AevixCardBrush}" CornerRadius="{StaticResource AevixCardCornerRadius}" Padding="{StaticResource AevixCardPadding}">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Player" Style="{StaticResource SubtitleTextBlockStyle}" />
+                    <ComboBox x:Name="PlayerEngineBox" Header="Default engine" SelectedIndex="0">
+                        <ComboBoxItem Content="Auto (recommended)"  Tag="Auto" />
+                        <ComboBoxItem Content="VLC"                 Tag="Vlc" />
+                    </ComboBox>
+                    <ComboBox x:Name="DecoderModeBox" Header="Decoder mode" SelectedIndex="0">
+                        <ComboBoxItem Content="Auto"     Tag="Auto" />
+                        <ComboBoxItem Content="Hardware" Tag="Hardware" />
+                        <ComboBoxItem Content="Software" Tag="Software" />
+                    </ComboBox>
+                    <ComboBox x:Name="SleepTimerBox" Header="Sleep timer" SelectedIndex="0">
+                        <ComboBoxItem Content="Off"           Tag="0" />
+                        <ComboBoxItem Content="15 minutes"    Tag="15" />
+                        <ComboBoxItem Content="30 minutes"    Tag="30" />
+                        <ComboBoxItem Content="60 minutes"    Tag="60" />
+                        <ComboBoxItem Content="90 minutes"    Tag="90" />
+                        <ComboBoxItem Content="120 minutes"   Tag="120" />
+                    </ComboBox>
+                </StackPanel>
+            </Border>
+
+            <!-- EPG -->
+            <Border Background="{ThemeResource AevixCardBrush}" CornerRadius="{StaticResource AevixCardCornerRadius}" Padding="{StaticResource AevixCardPadding}">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="EPG" Style="{StaticResource SubtitleTextBlockStyle}" />
+                    <ToggleSwitch x:Name="EpgRefreshToggle" Header="Auto-refresh EPG" />
+                    <NumberBox x:Name="EpgOffsetBox" Header="EPG offset (minutes)" SpinButtonPlacementMode="Inline" Minimum="-720" Maximum="720" />
+                </StackPanel>
+            </Border>
+
+            <!-- TMDB integration -->
+            <Border Background="{ThemeResource AevixCardBrush}" CornerRadius="{StaticResource AevixCardCornerRadius}" Padding="{StaticResource AevixCardPadding}">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="TMDB integration" Style="{StaticResource SubtitleTextBlockStyle}" />
+                    <TextBlock Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource AevixMutedTextBrush}" TextWrapping="Wrap"
+                               Text="Optional. Add a TMDB API key to enrich movies and series with metadata, posters, and ratings." />
+                    <PasswordBox x:Name="TmdbKeyBox" Header="API key" />
+                </StackPanel>
+            </Border>
+
+            <!-- Parental controls -->
+            <Border Background="{ThemeResource AevixCardBrush}" CornerRadius="{StaticResource AevixCardCornerRadius}" Padding="{StaticResource AevixCardPadding}">
+                <StackPanel Spacing="12">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE72E;" FontSize="18" />
+                        <TextBlock Text="Parental controls" Style="{StaticResource SubtitleTextBlockStyle}" />
+                    </StackPanel>
+                    <TextBlock x:Name="ParentalStatusText" Foreground="{ThemeResource AevixMutedTextBrush}" />
+                    <ToggleSwitch x:Name="AdultBlockToggle" Header="Block adult content"
+                                  Toggled="AdultBlockToggle_Toggled" />
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <PasswordBox x:Name="PinBox" PlaceholderText="New / current PIN" Width="200" MaxLength="12" />
+                        <Button x:Name="SetPinButton"   Content="Set PIN"       Click="SetPin_Click"   Style="{StaticResource AccentButtonStyle}" />
+                        <Button x:Name="ClearPinButton" Content="Remove PIN"    Click="ClearPin_Click" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Save bar -->
+            <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,4,0,16">
+                <Button Content="Save settings" Click="Save_Click" Style="{StaticResource AccentButtonStyle}" />
+                <TextBlock x:Name="SaveStatusText" VerticalAlignment="Center" Foreground="{ThemeResource AevixMutedTextBrush}" />
+            </StackPanel>
         </StackPanel>
     </ScrollViewer>
 </Page>

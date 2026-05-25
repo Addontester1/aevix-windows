@@ -18,7 +18,8 @@
         -->
         <SwapChainPanel x:Name="VideoHost" />
 
-        <Border Grid.Row="1" Background="{ThemeResource SystemControlBackgroundAcrylicElementBrush}" Padding="12">
+        <!-- WinUI 3 acrylic key — UWP's SystemControl* keys are not present. -->
+        <Border Grid.Row="1" Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}" Padding="12">
             <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <TextBlock x:Name="TitleText" Foreground="White" VerticalAlignment="Center" FontWeight="SemiBold" />
                 <Button Content="Play"  Click="Play_Click" />

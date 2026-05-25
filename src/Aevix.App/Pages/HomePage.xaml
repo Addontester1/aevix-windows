@@ -5,21 +5,99 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:m="using:Aevix.Core.Models"
     mc:Ignorable="d">
     <ScrollViewer>
-        <StackPanel Padding="32" Spacing="16">
-            <TextBlock Text="Welcome to Aevix" Style="{StaticResource TitleLargeTextBlockStyle}" />
-            <TextBlock x:Name="StatusText" Style="{StaticResource BodyTextBlockStyle}" Opacity="0.8" />
+        <StackPanel Padding="32,20,32,32" Spacing="20">
 
-            <TextBlock Text="Continue watching" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,16,0,0" />
-            <ListView x:Name="ContinueList" SelectionMode="None" />
+            <!-- Hero -->
+            <Border CornerRadius="{StaticResource AevixCardCornerRadius}" Padding="24" MinHeight="160">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="{ThemeResource AevixCoral}" Offset="0" />
+                        <GradientStop Color="{ThemeResource AevixTeal}"  Offset="1" />
+                    </LinearGradientBrush>
+                </Border.Background>
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Aevix" FontSize="36" FontWeight="SemiBold" Foreground="White" />
+                    <TextBlock x:Name="HeroPrimary"   Foreground="White" Style="{StaticResource SubtitleTextBlockStyle}" />
+                    <TextBlock x:Name="HeroSecondary" Foreground="#CCFFFFFF" />
+                    <TextBlock x:Name="HeroCounters"  Foreground="#CCFFFFFF" Margin="0,4,0,0" />
+                    <StackPanel x:Name="HeroActions" Orientation="Horizontal" Spacing="8" Margin="0,12,0,0">
+                        <Button Content="Live TV"  Click="GoLiveTv_Click" />
+                        <Button Content="Movies"   Click="GoMovies_Click" />
+                        <Button Content="Series"   Click="GoSeries_Click" />
+                        <Button Content="Search"   Click="GoSearch_Click" />
+                    </StackPanel>
+                    <StackPanel x:Name="HeroEmptyActions" Orientation="Horizontal" Spacing="8" Margin="0,12,0,0" Visibility="Collapsed">
+                        <Button Content="Add your first playlist" Click="GoPlaylists_Click" Style="{StaticResource AccentButtonStyle}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
 
-            <TextBlock Text="Quick actions" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,16,0,0" />
-            <StackPanel Orientation="Horizontal" Spacing="12">
-                <Button Content="Manage playlists" Click="GoPlaylists_Click" />
-                <Button Content="Open Live TV" Click="GoLiveTv_Click" />
-                <Button Content="Open Movies" Click="GoMovies_Click" />
+            <!-- Continue watching -->
+            <StackPanel Spacing="8">
+                <TextBlock Text="Continue watching" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <TextBlock x:Name="ContinueEmpty" Visibility="Collapsed" Foreground="{ThemeResource AevixMutedTextBrush}"
+                           Text="Nothing in progress yet — play something to see it here." />
+                <ScrollViewer x:Name="ContinueScroller" HorizontalScrollMode="Enabled" HorizontalScrollBarVisibility="Hidden" VerticalScrollMode="Disabled" VerticalScrollBarVisibility="Hidden">
+                    <ItemsRepeater x:Name="ContinueList">
+                        <ItemsRepeater.Layout>
+                            <StackLayout Orientation="Horizontal" Spacing="12" />
+                        </ItemsRepeater.Layout>
+                        <ItemsRepeater.ItemTemplate>
+                            <DataTemplate x:DataType="m:PlaybackProgress">
+                                <Border Width="220" Height="140" CornerRadius="{StaticResource AevixPosterCornerRadius}" Background="{ThemeResource AevixCardBrush}">
+                                    <Grid>
+                                        <Image Source="{x:Bind PosterUrl}" Stretch="UniformToFill" Opacity="0.85" />
+                                        <Border VerticalAlignment="Bottom" Background="#AA000000" Padding="10,6">
+                                            <StackPanel Spacing="2">
+                                                <TextBlock Text="{x:Bind ItemTitle}" Foreground="White" FontWeight="SemiBold" MaxLines="1" TextTrimming="CharacterEllipsis" />
+                                                <ProgressBar Value="{x:Bind Percentage}" Minimum="0" Maximum="1" Height="3" />
+                                            </StackPanel>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsRepeater.ItemTemplate>
+                    </ItemsRepeater>
+                </ScrollViewer>
             </StackPanel>
+
+            <!-- Other playlists -->
+            <StackPanel Spacing="8">
+                <TextBlock Text="Other playlists" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <TextBlock x:Name="OthersEmpty" Visibility="Collapsed" Foreground="{ThemeResource AevixMutedTextBrush}"
+                           Text="You only have one playlist configured." />
+                <ItemsRepeater x:Name="OtherPlaylistsList">
+                    <ItemsRepeater.Layout>
+                        <StackLayout Orientation="Vertical" Spacing="8" />
+                    </ItemsRepeater.Layout>
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate x:DataType="m:Playlist">
+                            <Border Background="{ThemeResource AevixCardBrush}" CornerRadius="{StaticResource AevixCardCornerRadius}" Padding="16,12">
+                                <Grid ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" />
+                                        <TextBlock Foreground="{ThemeResource AevixMutedTextBrush}" FontSize="12">
+                                            <Run Text="{x:Bind Type}" /><Run Text=" · " /><Run Text="{x:Bind Url}" />
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="1" VerticalAlignment="Center" Foreground="{ThemeResource AevixMutedTextBrush}">
+                                        <Run Text="{x:Bind ChannelCount}" /><Run Text=" ch · " /><Run Text="{x:Bind VodCount}" /><Run Text=" vod · " /><Run Text="{x:Bind SeriesCount}" /><Run Text=" series" />
+                                    </TextBlock>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
+            </StackPanel>
+
+            <Button HorizontalAlignment="Right" Content="Manage playlists" Click="GoPlaylists_Click" />
         </StackPanel>
     </ScrollViewer>
 </Page>

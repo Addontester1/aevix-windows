@@ -11,16 +11,22 @@ public partial class App : Application
 {
     private Window? _window;
 
+    /// <summary>
+    /// Per-launch crash log path. Anything that escapes a UI callback lands
+    /// here so we can diagnose 0xc000027b-style XAML faults.
+    /// </summary>
+    private static readonly string CrashLogPath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "Aevix", "crash.log");
+
     public App()
     {
         InitializeComponent();
+        UnhandledException += (_, e) => Log("App.UnhandledException", e.Exception);
+        AppDomain.CurrentDomain.UnhandledException += (_, e) => Log("AppDomain.UnhandledException", e.ExceptionObject as Exception);
+        TaskScheduler.UnobservedTaskException += (_, e) => Log("TaskScheduler.UnobservedTaskException", e.Exception);
     }
 
-    /// <summary>
-    /// Materialised once at process start — null until <see cref="OnLaunched"/>
-    /// completes. Pages should resolve services via constructor injection
-    /// (page constructors call <c>AppHost.Services.GetRequiredService&lt;T&gt;()</c>).
-    /// </summary>
     public static IServiceProvider Services => AppHost.Services;
 
     /// <summary>
@@ -31,9 +37,30 @@ public partial class App : Application
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
-        AppHost.Build();
-        _window = new MainWindow();
-        MainWindowInstance = _window;
-        _window.Activate();
+        try
+        {
+            AppHost.Build();
+            _window = new MainWindow();
+            MainWindowInstance = _window;
+            _window.Activate();
+        }
+        catch (Exception ex)
+        {
+            Log("OnLaunched", ex);
+            throw;
+        }
+    }
+
+    /// <summary>Append a timestamped entry to the crash log; swallow any logging errors.</summary>
+    private static void Log(string source, Exception? ex)
+    {
+        if (ex is null) return;
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(CrashLogPath)!);
+            File.AppendAllText(CrashLogPath,
+                $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {source}{Environment.NewLine}{ex}{Environment.NewLine}{Environment.NewLine}");
+        }
+        catch { /* logging must not crash the crash handler */ }
     }
 }

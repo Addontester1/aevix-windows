@@ -21,7 +21,15 @@ public sealed partial class LiveTvPage : Page
         {
             if (e.PropertyName == nameof(Vm.StatusText)) StatusText.Text = Vm.StatusText;
         };
-        Loaded += async (_, _) => await Vm.LoadAsync();
+        Vm.Channels.CollectionChanged += (_, _) => UpdateEmptyState();
+        Loaded += async (_, _) => { await Vm.LoadAsync(); UpdateEmptyState(); };
+    }
+
+    private void UpdateEmptyState()
+    {
+        var empty = Vm.Channels.Count == 0;
+        EmptyState.Visibility = empty ? Microsoft.UI.Xaml.Visibility.Visible : Microsoft.UI.Xaml.Visibility.Collapsed;
+        ChannelList.Visibility = empty ? Microsoft.UI.Xaml.Visibility.Collapsed : Microsoft.UI.Xaml.Visibility.Visible;
     }
 
     private void CategoryList_SelectionChanged(object sender, SelectionChangedEventArgs e)

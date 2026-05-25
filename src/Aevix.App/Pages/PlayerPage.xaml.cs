@@ -305,21 +305,37 @@ public sealed partial class PlayerPage : Page
         if (_wasFullscreen) ExitFullscreen(); else EnterFullscreen();
     }
 
-    private void EnterFullscreen()
+    private async void EnterFullscreen()
     {
         var aw = App.MainWindowInstance.AppWindow;
         _previousPresenter = aw.Presenter as OverlappedPresenter;
         aw.SetPresenter(AppWindowPresenterKind.FullScreen);
         FullscreenGlyph.Glyph = "\xE73F"; // back-to-window
         _wasFullscreen = true;
+
+        // Hide the chrome so VideoArea expands to fill the entire monitor.
+        // The controls bar will reappear on mouse movement (then re-hide).
+        HideControls();
+
+        // Presenter changes don't always raise position/size events; wait a
+        // tick for layout to settle and force the popup to catch up.
+        await Task.Delay(50);
+        _surface?.ForceReposition();
     }
 
-    private void ExitFullscreen()
+    private async void ExitFullscreen()
     {
         var aw = App.MainWindowInstance.AppWindow;
         if (_previousPresenter is not null) aw.SetPresenter(_previousPresenter);
         else aw.SetPresenter(AppWindowPresenterKind.Overlapped);
         FullscreenGlyph.Glyph = "\xE740";
         _wasFullscreen = false;
+
+        ShowControls();
+        _autoHideTimer?.Stop();
+        _autoHideTimer?.Start();
+
+        await Task.Delay(50);
+        _surface?.ForceReposition();
     }
 }

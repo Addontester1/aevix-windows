@@ -112,8 +112,17 @@ public sealed class VideoChildWindow : IDisposable
     private void OnLayoutUpdated(object? sender, object e) => Reposition();
     private void OwnerAppWindowChanged(Microsoft.UI.Windowing.AppWindow s, Microsoft.UI.Windowing.AppWindowChangedEventArgs e)
     {
-        if (e.DidPositionChange || e.DidSizeChange) Reposition();
+        // DidPresenterChange catches the windowed ↔ fullscreen transition,
+        // which doesn't always raise position / size events on its own.
+        if (e.DidPositionChange || e.DidSizeChange || e.DidPresenterChange) Reposition();
     }
+
+    /// <summary>
+    /// Force a reposition pass — used when the caller knows layout has
+    /// settled but didn't get a callback (e.g. just after entering
+    /// fullscreen).
+    /// </summary>
+    public void ForceReposition() => Reposition();
 
     private void Reposition()
     {

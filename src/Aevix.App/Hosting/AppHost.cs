@@ -35,7 +35,17 @@ public static class AppHost
         services.AddLogging(b => b.AddDebug().SetMinimumLevel(LogLevel.Information));
 
         // -- HttpClient shared by Xtream + Stalker + raw M3U download. ----
-        services.AddHttpClient();
+        // We pin a desktop browser User-Agent and a generous timeout —
+        // some IPTV panels (Xtream especially) reject GETs that come in
+        // with the default .NET UA, and category fetches on large
+        // playlists routinely take 30s+.
+        services.AddHttpClient("aevix", client =>
+        {
+            client.DefaultRequestHeaders.UserAgent.ParseAdd(
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36 Aevix/1.0");
+            client.DefaultRequestHeaders.Accept.ParseAdd("application/json, text/plain, */*");
+            client.Timeout = TimeSpan.FromSeconds(60);
+        });
         services.AddSingleton(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("aevix"));
 
         // -- Core services ------------------------------------------------

@@ -63,4 +63,23 @@ public partial class App : Application
         }
         catch { /* logging must not crash the crash handler */ }
     }
+
+    /// <summary>
+    /// Public diagnostic logger — pages can call this to record exceptions
+    /// they handled inline (so the user sees a friendly message AND we
+    /// retain a stack trace).
+    /// </summary>
+    public static void LogDiagnostic(string source, Exception ex) => Log(source, ex);
+
+    /// <summary>Public diagnostic info logger — for non-exception events worth tracing.</summary>
+    public static void LogInfo(string source, string message)
+    {
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(CrashLogPath)!);
+            File.AppendAllText(CrashLogPath,
+                $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] INFO {source}: {message}{Environment.NewLine}");
+        }
+        catch { }
+    }
 }

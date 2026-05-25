@@ -126,41 +126,51 @@ public sealed partial class PlaylistFormPage : Page
 
     private async void Save_Click(object sender, RoutedEventArgs e)
     {
-        Vm.Name = NameBox.Text;
-        Vm.Type = (TypeBox.SelectedItem as ComboBoxItem)?.Tag?.ToString() switch
+        try
         {
-            "M3UFile" => PlaylistType.M3UFile,
-            "Xtream"  => PlaylistType.Xtream,
-            "Stalker" => PlaylistType.Stalker,
-            _         => PlaylistType.M3UUrl,
-        };
+            Vm.Name = NameBox.Text;
+            Vm.Type = (TypeBox.SelectedItem as ComboBoxItem)?.Tag?.ToString() switch
+            {
+                "M3UFile" => PlaylistType.M3UFile,
+                "Xtream"  => PlaylistType.Xtream,
+                "Stalker" => PlaylistType.Stalker,
+                _         => PlaylistType.M3UUrl,
+            };
 
-        // Pull values from whichever group is currently visible.
-        switch (Vm.Type)
-        {
-            case PlaylistType.M3UUrl:
-                Vm.Url = M3uUrlBox.Text;
-                Vm.Username = null; Vm.Password = null; Vm.MacAddress = null;
-                break;
-            case PlaylistType.M3UFile:
-                Vm.Url = M3uFileBox.Text;
-                Vm.Username = null; Vm.Password = null; Vm.MacAddress = null;
-                break;
-            case PlaylistType.Xtream:
-                Vm.Url = XtreamUrlBox.Text;
-                Vm.Username = XtreamUserBox.Text;
-                Vm.Password = XtreamPassBox.Password;
-                Vm.MacAddress = null;
-                break;
-            case PlaylistType.Stalker:
-                Vm.Url = StalkerUrlBox.Text;
-                Vm.MacAddress = StalkerMacBox.Text;
-                Vm.Username = null; Vm.Password = null;
-                break;
+            // Pull values from whichever group is currently visible.
+            switch (Vm.Type)
+            {
+                case PlaylistType.M3UUrl:
+                    Vm.Url = M3uUrlBox.Text;
+                    Vm.Username = null; Vm.Password = null; Vm.MacAddress = null;
+                    break;
+                case PlaylistType.M3UFile:
+                    Vm.Url = M3uFileBox.Text;
+                    Vm.Username = null; Vm.Password = null; Vm.MacAddress = null;
+                    break;
+                case PlaylistType.Xtream:
+                    Vm.Url = XtreamUrlBox.Text;
+                    Vm.Username = XtreamUserBox.Text;
+                    Vm.Password = XtreamPassBox.Password;
+                    Vm.MacAddress = null;
+                    break;
+                case PlaylistType.Stalker:
+                    Vm.Url = StalkerUrlBox.Text;
+                    Vm.MacAddress = StalkerMacBox.Text;
+                    Vm.Username = null; Vm.Password = null;
+                    break;
+            }
+
+            var saved = await Vm.SaveAsync();
+            if (saved is not null && Frame.CanGoBack) Frame.GoBack();
         }
-
-        var saved = await Vm.SaveAsync();
-        if (saved is not null && Frame.CanGoBack) Frame.GoBack();
+        catch (Exception ex)
+        {
+            // Surface the actual error inline AND log it so we can debug
+            // "Save fails silently" reports without a crash.
+            StatusText.Text = $"Save error: {ex.Message}";
+            App.LogDiagnostic("PlaylistFormPage.Save_Click", ex);
+        }
     }
 
     private void Cancel_Click(object sender, RoutedEventArgs e)

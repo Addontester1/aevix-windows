@@ -52,6 +52,9 @@ public sealed partial class PlaylistFormViewModel : ObservableObject
 
     public async Task<Playlist?> SaveAsync(CancellationToken ct = default)
     {
+        Aevix_App.App.LogInfo("PlaylistFormVM.Save",
+            $"type={Type} name='{Name}' urlSet={!string.IsNullOrWhiteSpace(Url)} userSet={!string.IsNullOrWhiteSpace(Username)} passSet={!string.IsNullOrWhiteSpace(Password)} macSet={!string.IsNullOrWhiteSpace(MacAddress)} editing={(EditingId ?? "no")}");
+
         if (!CanSave) { StatusText = "Name and URL are required."; return null; }
 
         // Validate per-type requirements so users see the issue here, not

@@ -76,10 +76,29 @@ public sealed class SyncService
     private async Task<Playlist> SyncXtreamAsync(Playlist p, IContentSink sink, IProgress<SyncProgress>? progress, CancellationToken ct)
     {
         progress?.Report(new SyncProgress("Authenticating", 0, 0, 0));
-        var auth = await _xtream.AuthenticateAsync(p.Url, p.Username!, p.Password!, ct);
-        if (auth?.UserInfo?.Status != "Active")
+        var authResult = await _xtream.AuthenticateVerboseAsync(p.Url, p.Username!, p.Password!, ct);
+        _log.LogInformation("Xtream auth: url={Url} success={Success} error={Error} status={Status}",
+            authResult.Url,
+            authResult.Success,
+            authResult.Error,
+            authResult.Response?.UserInfo?.Status);
+
+        if (!authResult.Success)
         {
-            return p with { LastError = $"Xtream auth status: {auth?.UserInfo?.Status ?? "unknown"}" };
+            return p with { LastError = $"Xtream auth failed: {authResult.Error}" };
+        }
+
+        var auth = authResult.Response!;
+        // Some panels report status as "Active", some "Banned", some return
+        // user_info with no status at all. Only treat explicit "Banned" /
+        // "Expired" as fatal; everything else continues so the user can at
+        // least pull a partial sync.
+        var status = auth.UserInfo?.Status;
+        if (status is not null && (status.Equals("Banned", StringComparison.OrdinalIgnoreCase)
+                                || status.Equals("Disabled", StringComparison.OrdinalIgnoreCase)
+                                || status.Equals("Expired", StringComparison.OrdinalIgnoreCase)))
+        {
+            return p with { LastError = $"Xtream account is {status}." };
         }
 
         progress?.Report(new SyncProgress("Fetching live", 0, 0, 0));

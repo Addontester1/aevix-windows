@@ -106,6 +106,7 @@ public sealed class VideoChildWindow : IDisposable
     }
 
     public void Hide() => SetWindowPos(Hwnd, IntPtr.Zero, 0, 0, 0, 0, SWP_NOZORDER | SWP_NOACTIVATE | SWP_HIDEWINDOW | SWP_NOMOVE | SWP_NOSIZE);
+    public void Show() { Reposition(); /* SetWindowPos with SWP_SHOWWINDOW happens in Reposition */ }
 
     private void OnLayoutChanged(object sender, Microsoft.UI.Xaml.SizeChangedEventArgs e) => Reposition();
     private void OnLayoutUpdated(object? sender, object e) => Reposition();

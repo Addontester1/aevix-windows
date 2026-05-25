@@ -6,33 +6,90 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     mc:Ignorable="d">
-    <Grid Background="Black">
+    <Grid Background="Black" PointerMoved="Root_PointerMoved">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <!--
-            VideoArea is just a layout reservation. The actual video pixels
-            are painted by a Win32 child HWND that mirrors this element's
-            position + size. See Controls/VideoChildWindow.cs.
-        -->
-        <Border x:Name="VideoArea" Background="#FF101010" />
 
-        <Border Grid.Row="1" Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}" Padding="12">
-            <Grid ColumnSpacing="12">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                    <TextBlock x:Name="TitleText" Foreground="White" VerticalAlignment="Center" FontWeight="SemiBold" />
+        <!--
+            VideoArea: the WS_POPUP overlay is positioned over this Border.
+            The LoadingPanel is shown by hiding the popup temporarily so the
+            ProgressRing painted inside the WinUI tree becomes visible.
+        -->
+        <Grid x:Name="VideoHost">
+            <Border x:Name="VideoArea" Background="Black" />
+
+            <!-- Loading / status overlay shown when buffering or errored. -->
+            <Grid x:Name="LoadingPanel" Visibility="Visible" Background="Black">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+                    <ProgressRing x:Name="LoadingRing" IsActive="True" Width="56" Height="56" />
+                    <TextBlock x:Name="LoadingText" Text="Loading…" Foreground="White" HorizontalAlignment="Center" />
                 </StackPanel>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                    <Button Content="Play"  Click="Play_Click" />
-                    <Button Content="Pause" Click="Pause_Click" />
-                    <Button Content="Stop"  Click="Stop_Click" />
-                    <TextBlock x:Name="StatusText" Foreground="White" VerticalAlignment="Center" Opacity="0.7" Margin="8,0,0,0" />
-                </StackPanel>
+            </Grid>
+
+            <!-- Center play indicator that pulses briefly when user toggles play/pause. -->
+            <Border x:Name="CenterPulse" Visibility="Collapsed" Width="80" Height="80" CornerRadius="40"
+                    Background="#80000000" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <FontIcon x:Name="CenterPulseGlyph" Glyph="&#xE768;" FontSize="32" Foreground="White" />
+            </Border>
+        </Grid>
+
+        <!--
+            Controls bar — auto-hides on inactivity. Lives in its own grid row
+            (not overlaid on video) so the WS_POPUP can sit above it cleanly.
+            When hidden, the popup expands to cover everything; when shown, the
+            popup re-positions to leave room for the bar.
+        -->
+        <Border x:Name="ControlsBar" Grid.Row="1"
+                Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+                Padding="16,10">
+            <Grid RowSpacing="6">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- Row 1: title -->
+                <TextBlock x:Name="TitleText" Foreground="White" FontWeight="SemiBold" />
+
+                <!-- Row 2: scrubber + transport + volume + fullscreen -->
+                <Grid Grid.Row="1" ColumnSpacing="12" VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="120" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Button x:Name="PlayPauseButton" Click="PlayPause_Click" MinWidth="44" ToolTipService.ToolTip="Play / Pause">
+                        <FontIcon x:Name="PlayPauseGlyph" Glyph="&#xE769;" FontSize="14" />
+                    </Button>
+                    <Button Grid.Column="1" Click="Stop_Click" MinWidth="44" ToolTipService.ToolTip="Stop">
+                        <FontIcon Glyph="&#xE71A;" FontSize="14" />
+                    </Button>
+
+                    <TextBlock Grid.Column="2" x:Name="TimeText" Foreground="White" VerticalAlignment="Center" Text="0:00 / 0:00" />
+
+                    <Slider Grid.Column="3" x:Name="Scrubber" Minimum="0" Maximum="100" Value="0"
+                            PointerCaptureLost="Scrubber_PointerCaptureLost" KeyUp="Scrubber_KeyUp"
+                            VerticalAlignment="Center" />
+
+                    <Button Grid.Column="4" x:Name="MuteButton" Click="Mute_Click" MinWidth="44" ToolTipService.ToolTip="Mute">
+                        <FontIcon x:Name="MuteGlyph" Glyph="&#xE767;" FontSize="14" />
+                    </Button>
+                    <FontIcon Grid.Column="5" Glyph="&#xE767;" FontSize="12" Foreground="White" VerticalAlignment="Center" />
+                    <Slider Grid.Column="6" x:Name="VolumeSlider" Minimum="0" Maximum="100" Value="100"
+                            ValueChanged="VolumeSlider_ValueChanged" VerticalAlignment="Center" />
+
+                    <Button Grid.Column="7" x:Name="FullscreenButton" Click="Fullscreen_Click" MinWidth="44" ToolTipService.ToolTip="Fullscreen (F11)">
+                        <FontIcon x:Name="FullscreenGlyph" Glyph="&#xE740;" FontSize="14" />
+                    </Button>
+                </Grid>
             </Grid>
         </Border>
     </Grid>

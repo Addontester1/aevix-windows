@@ -310,11 +310,14 @@ public sealed partial class PlayerPage : Page
         var aw = App.MainWindowInstance.AppWindow;
         _previousPresenter = aw.Presenter as OverlappedPresenter;
         aw.SetPresenter(AppWindowPresenterKind.FullScreen);
+        // Collapse the title bar + sidebar so VideoArea spans the entire
+        // monitor — without this the WinUI chrome eats the left strip and
+        // top strip even when the OS-level fullscreen presenter is active.
+        (App.MainWindowInstance as MainWindow)?.SetImmersiveMode(true);
         FullscreenGlyph.Glyph = "\xE73F"; // back-to-window
         _wasFullscreen = true;
 
-        // Hide the chrome so VideoArea expands to fill the entire monitor.
-        // The controls bar will reappear on mouse movement (then re-hide).
+        // Hide the controls bar so the video fills bottom-to-top too.
         HideControls();
 
         // Presenter changes don't always raise position/size events; wait a
@@ -328,6 +331,7 @@ public sealed partial class PlayerPage : Page
         var aw = App.MainWindowInstance.AppWindow;
         if (_previousPresenter is not null) aw.SetPresenter(_previousPresenter);
         else aw.SetPresenter(AppWindowPresenterKind.Overlapped);
+        (App.MainWindowInstance as MainWindow)?.SetImmersiveMode(false);
         FullscreenGlyph.Glyph = "\xE740";
         _wasFullscreen = false;
 

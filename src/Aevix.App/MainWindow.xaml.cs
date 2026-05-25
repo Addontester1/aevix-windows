@@ -47,6 +47,25 @@ public sealed partial class MainWindow : Window
         if (NavFrame.CanGoBack) NavFrame.GoBack();
     }
 
+    /// <summary>
+    /// "Immersive" = no title bar, no sidebar — used when the player goes
+    /// fullscreen so the video has the entire WinUI client area to itself.
+    /// The video popup then sizes to the now-empty page Frame and covers
+    /// the whole monitor.
+    /// </summary>
+    public void SetImmersiveMode(bool immersive)
+    {
+        // Collapse the title bar row entirely. Setting Height to 0 also
+        // hides the chrome the user otherwise sees as a thin strip up top.
+        TitleBarRow.Height = immersive ? new GridLength(0) : new GridLength(48);
+        AppTitleBar.Visibility = immersive ? Visibility.Collapsed : Visibility.Visible;
+
+        // Hide the sidebar pane. PaneDisplayMode = Top with no menu items
+        // would draw a thin top strip; LeftMinimal still leaves a 40-ish
+        // pixel rail. Setting IsPaneVisible=false collapses it fully.
+        NavView.IsPaneVisible = !immersive;
+    }
+
     private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
         if (args.IsSettingsSelected)

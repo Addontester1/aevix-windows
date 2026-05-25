@@ -24,6 +24,10 @@ public sealed partial class PlaylistFormPage : Page
             if (e.PropertyName == nameof(Vm.StatusText)) StatusText.Text = Vm.StatusText;
             if (e.PropertyName == nameof(Vm.FormTitle)) FormTitleText.Text = Vm.FormTitle;
         };
+        // Safe to set now — all named elements have been materialised.
+        _hydrating = true;
+        TypeBox.SelectedIndex = 0;
+        _hydrating = false;
         ApplyTypeVisibility(PlaylistType.M3UUrl);
     }
 
@@ -97,6 +101,9 @@ public sealed partial class PlaylistFormPage : Page
 
     private void ApplyTypeVisibility(PlaylistType type)
     {
+        // Defensive: SelectionChanged can theoretically fire before all the
+        // named XAML elements have been materialised. Don't crash on it.
+        if (M3uUrlGroup is null || M3uFileGroup is null || XtreamGroup is null || StalkerGroup is null) return;
         M3uUrlGroup.Visibility  = type == PlaylistType.M3UUrl  ? Visibility.Visible : Visibility.Collapsed;
         M3uFileGroup.Visibility = type == PlaylistType.M3UFile ? Visibility.Visible : Visibility.Collapsed;
         XtreamGroup.Visibility  = type == PlaylistType.Xtream  ? Visibility.Visible : Visibility.Collapsed;

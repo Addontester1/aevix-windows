@@ -14,8 +14,11 @@
                            Foreground="{ThemeResource AevixMutedTextBrush}" />
             </StackPanel>
 
+            <!-- No IsSelected here; we set the index in code-behind after
+                 InitializeComponent so the SelectionChanged handler doesn't
+                 fire while the named StackPanels below don't exist yet. -->
             <ComboBox x:Name="TypeBox" Header="Type" SelectionChanged="TypeBox_SelectionChanged" MinWidth="240">
-                <ComboBoxItem Content="M3U URL"        Tag="M3UUrl" IsSelected="True" />
+                <ComboBoxItem Content="M3U URL"        Tag="M3UUrl" />
                 <ComboBoxItem Content="M3U file"       Tag="M3UFile" />
                 <ComboBoxItem Content="Xtream Codes"   Tag="Xtream" />
                 <ComboBoxItem Content="Stalker portal" Tag="Stalker" />
